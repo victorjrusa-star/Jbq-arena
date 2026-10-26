@@ -1,1139 +1,1130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JBQ Arena - Official Bible Fact-Pak Quiz Engine</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Canvas Confetti for Victories -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      user-select: none;
-    }
-    .pulse-ring {
-      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-    }
-    .bar {
-      display: inline-block;
-      width: 4px;
-      height: 18px;
-      border-radius: 2px;
-      background-color: #3b82f6;
-      animation: wave 1.2s infinite ease-in-out;
-    }
-    .bar:nth-child(1) { animation-delay: 0.0s; }
-    .bar:nth-child(2) { animation-delay: 0.15s; }
-    .bar:nth-child(3) { animation-delay: 0.3s; }
-    .bar:nth-child(4) { animation-delay: 0.45s; }
-    @keyframes wave {
-      0%, 100% { height: 6px; }
-      50% { height: 24px; }
-    }
-  </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
-
-  <!-- TOP HEADER / NAV -->
-  <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.app.showScreen('landing')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center font-extrabold text-xl text-white shadow-lg shadow-indigo-500/20">
-          ✝
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-amber-400 bg-clip-text text-transparent">
-            JBQ Arena
-          </h1>
-          <p class="text-xs text-slate-400 font-medium">Bible Fact-Pak Match Engine (#1 - #576)</p>
-        </div>
-      </div>
-
-      <div id="headerMatchInfo" class="hidden flex items-center space-x-3 bg-slate-800/80 border border-slate-700/60 rounded-full px-4 py-1.5 text-xs font-semibold">
-        <span class="flex items-center text-amber-400"><i data-lucide="hash" class="w-3.5 h-3.5 mr-1"></i> <span id="headerCode">---</span></span>
-        <span class="text-slate-600">|</span>
-        <span class="text-slate-300" id="headerQProgress">Q 0/0</span>
-        <span class="text-slate-600">|</span>
-        <span id="headerPointsBadge" class="px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">10 Pts</span>
-      </div>
-
-      <div class="flex items-center space-x-2">
-        <button onclick="window.app.toggleAdminDrawer()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition flex items-center">
-          <i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings / Admin
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN APPLICATION CONTAINER -->
-  <main class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
-    
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-    <!-- 1. LANDING & PORTAL SCREEN -->
-    <section id="screenLanding" class="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10">
-      <div class="text-center mb-6">
-        <span class="inline-block p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-          <i data-lucide="zap" class="w-8 h-8"></i>
-        </span>
-        <h2 class="text-2xl font-extrabold text-white">Join Quiz Room</h2>
-        <p class="text-xs text-slate-400 mt-1">Enter room pin or create a match lobby</p>
-      </div>
-
-      <form onsubmit="window.app.handleJoinMatch(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Your Name / Quizzer ID</label>
-          <input type="text" id="inputPlayerName" required maxlength="16" placeholder="e.g. Samuel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">7-Digit Match Code</label>
-          <input type="text" id="inputMatchCode" maxlength="8" placeholder="e.g. 839-2041" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-amber-400 font-mono tracking-wider focus:outline-none focus:border-amber-500">
-        </div>
-
-        <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition transform active:scale-95 flex items-center justify-center">
-          <i data-lucide="play-circle" class="w-5 h-5 mr-2"></i> Join Match Lobby
-        </button>
-      </form>
-
-      <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
-        <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-900 px-3 text-slate-500 font-semibold">Or Host Match</span></div>
-      </div>
-
-      <button onclick="window.app.showHostSetup()" class="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-semibold rounded-xl transition flex items-center justify-center text-sm">
-        <i data-lucide="plus-circle" class="w-4 h-4 mr-2 text-amber-400"></i> Create New Room
-      </button>
-    </section>
-
-    <!-- 2. HOST / ROOM CREATION SCREEN -->
-    <section id="screenHostSetup" class="hidden w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10">
-      <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
-        <div>
-          <h2 class="text-xl font-bold text-white flex items-center"><i data-lucide="sliders" class="w-5 h-5 text-amber-400 mr-2"></i> Create Match Session</h2>
-          <p class="text-xs text-slate-400">Configure exact question sequence numbers and rules</p>
-        </div>
-        <button onclick="window.app.showScreen('landing')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Host Display Name</label>
-          <input type="text" id="hostNameInput" value="Head Coach" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none">
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Number of Questions</label>
-            <input type="number" id="inputQuestionCount" value="20" min="1" max="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Category Range Mode</label>
-            <select id="selectCategoryMode" onchange="window.app.handleCategoryModeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-amber-400 font-semibold focus:outline-none">
-              <option value="10" selected>10-Pointers (#1 - #288)</option>
-              <option value="20">20-Pointers (#289 - #480)</option>
-              <option value="30">30-Pointers (#481 - #576)</option>
-              <option value="custom">Custom Range (#1 - #576)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-slate-200">Start & End Sequence Numbers</label>
-            <span id="rangeHintBadge" class="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Range: #1 - #288</span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Start From Question #</label>
-              <input type="number" id="inputStartQNum" value="1" min="1" max="576" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-amber-500">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">End At Question #</label>
-              <input type="number" id="inputEndQNum" value="288" min="1" max="576" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-amber-500">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Question Play Order</label>
-            <select id="selectPlayOrder" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none">
-              <option value="sequential" selected>Strict Numerical Sequence (e.g. #1, #2, #3...)</option>
-              <option value="shuffled">Shuffled / Random Order from Range</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="text-xs font-semibold text-slate-200 block">Pause After Bold Words</span>
-              <span class="text-[11px] text-slate-400 block">Pause reader briefly after essential bold question core</span>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="togglePauseBold" checked class="sr-only peer">
-              <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-            </label>
-          </div>
-
-          <div>
-            <div class="flex justify-between text-xs font-semibold text-slate-300 mb-1">
-              <span>TTS Reading Speed</span>
-              <span id="speedValueLabel" class="text-amber-400">1.0x</span>
-            </div>
-            <input type="range" id="inputSpeedSlider" min="0.5" max="1.5" step="0.25" value="1.0" oninput="document.getElementById('speedValueLabel').innerText = this.value + 'x'" class="w-full accent-amber-500">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-2">Add AI Opponents (Practice Mode)</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="window.app.toggleBotCount(0)" id="botBtn0" class="bot-select-btn py-2 text-xs font-bold rounded-lg border border-indigo-500/50 bg-indigo-500/10 text-indigo-300">No Bots</button>
-            <button type="button" onclick="window.app.toggleBotCount(2)" id="botBtn2" class="bot-select-btn py-2 text-xs font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400">+2 Bots</button>
-            <button type="button" onclick="window.app.toggleBotCount(4)" id="botBtn4" class="bot-select-btn py-2 text-xs font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400">+4 Bots</button>
-          </div>
-        </div>
-
-        <button onclick="window.app.createNewMatch()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-amber-500/20 transition transform active:scale-95 flex items-center justify-center">
-          <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Generate Code & Open Lobby
-        </button>
-      </div>
-    </section>
-
-    <!-- 3. WAITING ROOM / LOBBY SCREEN -->
-    <section id="screenLobby" class="hidden w-full max-w-xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 text-center">
-      <div class="inline-block p-3 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-3">
-        <i data-lucide="users" class="w-8 h-8"></i>
-      </div>
-      <h2 class="text-2xl font-black text-white mb-1">Match Waiting Lobby</h2>
-      <p class="text-xs text-slate-400 mb-6">Share the match code below with participants so they can join</p>
-
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 mb-6 shadow-inner">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">7-Digit Match Code</span>
-        <div class="flex items-center justify-center space-x-3">
-          <span id="lobbyMatchCodeDisplay" class="text-3xl sm:text-4xl font-mono font-black text-amber-400 tracking-wider">---</span>
-          <button onclick="window.app.copyMatchCode()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition flex items-center shadow">
-            <i data-lucide="copy" class="w-4 h-4 mr-1.5"></i> Copy Code
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 mb-6 text-left">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center">
-            <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400 mr-1.5"></i> Joined Quizzers (<span id="lobbyPlayerCount">1</span>)
-          </h3>
-          <span class="text-[10px] text-slate-500">Ready to start</span>
-        </div>
-        <div id="lobbyPlayerList" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-          <!-- Dynamically populated roster -->
-        </div>
-      </div>
-
-      <div class="flex space-x-3">
-        <button onclick="window.app.showScreen('landing')" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-sm transition">
-          Leave Lobby
-        </button>
-        <button onclick="window.app.startQuizFromLobby()" class="flex-1 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-extrabold rounded-xl text-sm shadow-lg shadow-emerald-600/30 transition flex items-center justify-center">
-          <i data-lucide="play" class="w-5 h-5 mr-2"></i> Start Quiz Now 🚀
-        </button>
-      </div>
-    </section>
-
-    <!-- 4. LIVE GAME ARENA SCREEN -->
-    <section id="screenArena" class="hidden w-full max-w-6xl flex flex-col lg:flex-row gap-6 relative z-10">
-      
-      <div class="flex-grow space-y-6">
-        
-        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative flex flex-col justify-between min-h-[360px]">
-          
-          <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-            <div class="flex items-center space-x-3">
-              <span id="badgeQNumber" class="text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">Question 1 of 20</span>
-              <span id="badgeQPoints" class="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">10 Points</span>
-              <span id="badgeQID" class="text-xs font-mono font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">#1</span>
-            </div>
-
-            <div id="audioStatusBar" class="flex items-center space-x-2 text-xs text-indigo-400 font-mono">
-              <div class="flex space-x-1 items-end h-4">
-                <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
-              </div>
-              <span id="audioStateText">Reading...</span>
-            </div>
-          </div>
-
-          <div class="my-6 text-center px-2">
-            <div id="quotationTag" class="hidden inline-block mb-2 text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-0.5 rounded-md">
-              ★ Quotation Question (Word-For-Word)
-            </div>
-            <div id="questionDisplay" class="text-xl sm:text-2xl lg:text-3xl font-medium text-slate-100 leading-relaxed max-w-3xl mx-auto">
-              Loading first question...
-            </div>
-            
-            <div id="pauseOverlay" class="hidden mt-4 inline-flex items-center space-x-3 bg-amber-500/10 border border-amber-500/30 px-4 py-2 rounded-2xl animate-pulse">
-              <i data-lucide="hourglass" class="w-4 h-4 text-amber-400"></i>
-              <span class="text-xs font-semibold text-amber-300">Paused after bold core (Guess window)...</span>
-              <button onclick="window.app.skipPause()" class="px-3 py-1 bg-amber-500 text-slate-950 font-bold text-xs rounded-lg hover:bg-amber-400 transition shadow">
-                Skip Pause ⏩
-              </button>
-            </div>
-          </div>
-
-          <div id="answerBox" class="mt-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Official Fact-Pak Answer</span>
-            <p id="answerDisplay" class="text-sm font-semibold text-emerald-400">Hidden until question is answered</p>
-          </div>
-
-          <div id="buzzLockoutBanner" class="hidden absolute inset-0 bg-slate-950/90 rounded-3xl backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-red-500/50 z-20">
-            <span class="px-4 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 font-black tracking-widest text-xs uppercase animate-pulse mb-3">
-              🚨 LOCKOUT - BUZZ IN DETECTED! 🚨
-            </span>
-            <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-1"><span id="buzzPlayerName" class="text-amber-400">---</span> BUZZED IN!</h3>
-            <p class="text-xs text-slate-400 mb-6" id="buzzTimeDetail">Response time: 420ms</p>
-
-            <div id="judgingControls" class="flex flex-wrap justify-center gap-3 w-full max-w-md">
-              <button onclick="window.app.judgeAnswer(true)" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center">
-                <i data-lucide="check" class="w-5 h-5 mr-1.5"></i> Correct (+<span id="judgePlusPts">10</span>)
-              </button>
-              <button onclick="window.app.judgeAnswer(false)" class="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition flex items-center justify-center">
-                <i data-lucide="x" class="w-5 h-5 mr-1.5"></i> Incorrect (-<span id="judgeMinusPts">5</span>)
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 text-center shadow-xl backdrop-blur-xl">
-          <button id="mainBuzzBtn" onclick="window.app.playerBuzz()" class="w-full py-8 sm:py-10 bg-gradient-to-tr from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-black text-2xl sm:text-3xl tracking-wider rounded-2xl shadow-2xl shadow-red-600/40 transform active:scale-95 transition flex flex-col items-center justify-center pulse-ring">
-            <span class="flex items-center"><i data-lucide="zap" class="w-8 h-8 mr-2 fill-current"></i> BUZZ IN NOW</span>
-            <span class="text-xs font-semibold text-red-100 opacity-80 mt-1">Press SPACEBAR or Tap Screen</span>
-          </button>
-        </div>
-
-      </div>
-
-      <div class="w-full lg:w-80 flex flex-col space-y-6">
-        
-        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl backdrop-blur-xl">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center">
-            <i data-lucide="play" class="w-4 h-4 text-indigo-400 mr-1.5"></i> Quizmaster Controls
-          </h3>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="window.app.nextQuestion()" class="py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center col-span-2">
-              <i data-lucide="skip-forward" class="w-4 h-4 mr-1"></i> Next Question
-            </button>
-            <button onclick="window.app.toggleTTSPause()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition flex items-center justify-center">
-              <i data-lucide="pause" class="w-3.5 h-3.5 mr-1"></i> Pause TTS
-            </button>
-            <button onclick="window.app.repeatQuestion()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition flex items-center justify-center">
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 mr-1"></i> Repeat
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-xl backdrop-blur-xl flex-grow flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
-                <i data-lucide="trophy" class="w-4 h-4 text-amber-400 mr-1.5"></i> Scoreboard
-              </h3>
-              <span id="playerCountBadge" class="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700">1 Player</span>
-            </div>
-
-            <div id="scoreboardList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-            </div>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between">
-            <span>6 Correct = Quiz-Out (+10)</span>
-            <span>3 Errors = Foul-Out</span>
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- 5. POST-GAME SUMMARY / LEADERBOARD SCREEN -->
-    <section id="screenSummary" class="hidden w-full max-w-2xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 text-center">
-      <div class="inline-block p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-400 mb-4">
-        <i data-lucide="award" class="w-12 h-12"></i>
-      </div>
-      <h2 class="text-3xl font-black text-white mb-1">Match Finished!</h2>
-      <p class="text-xs text-slate-400 mb-6">Final Official JBQ Match Results</p>
-
-      <div id="winnerBanner" class="p-6 rounded-2xl bg-gradient-to-r from-amber-500/20 via-indigo-500/20 to-amber-500/20 border border-amber-500/40 mb-6">
-        <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block mb-1">Match Winner</span>
-        <h3 id="winnerName" class="text-2xl font-extrabold text-white">---</h3>
-        <p id="winnerScore" class="text-sm font-bold text-amber-300 mt-1">0 Points</p>
-      </div>
-
-      <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-left mb-6 space-y-2" id="summaryList">
-      </div>
-
-      <div class="flex space-x-3">
-        <button onclick="window.app.showScreen('landing')" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-sm transition">
-          Exit to Lobby
-        </button>
-        <button onclick="window.app.restartMatch()" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-sm transition shadow-lg shadow-amber-500/20">
-          Play Again
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ADMIN & SETTINGS DRAWER MODAL -->
-  <div id="adminDrawer" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex justify-end">
-    <div class="w-full max-w-md bg-slate-900 border-l border-slate-800 h-full p-6 flex flex-col justify-between overflow-y-auto">
-      <div>
-        <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-          <h3 class="text-lg font-bold text-white flex items-center"><i data-lucide="shield" class="w-5 h-5 text-amber-400 mr-2"></i> Match Admin Panel</h3>
-          <button onclick="window.app.toggleAdminDrawer()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-
-        <div class="space-y-6">
-          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-            <span class="text-xs text-slate-400 font-semibold block mb-1">Current 7-Digit Match Code</span>
-            <div class="flex items-center justify-between">
-              <span id="adminMatchCode" class="font-mono text-xl font-extrabold text-amber-400 tracking-wider">NOT ACTIVE</span>
-              <button onclick="window.app.copyMatchCode()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-lg transition flex items-center">
-                <i data-lucide="copy" class="w-3.5 h-3.5 mr-1"></i> Copy
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Manual Score Override</h4>
-            <div id="adminPlayerAdjustList" class="space-y-2">
-              <p class="text-xs text-slate-500">No active players in room.</p>
-            </div>
-          </div>
-
-          <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Audio & TTS Options</h4>
-            <label class="block text-xs text-slate-300 mb-1">Voice Selection</label>
-            <select id="ttsVoiceSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="pt-6 border-t border-slate-800">
-        <button onclick="window.app.endMatchEarly()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-bold text-xs rounded-xl transition">
-          End Current Match & Summarize
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <footer class="bg-slate-950 border-t border-slate-900 py-3 text-center text-xs text-slate-600">
-    Assembly of God / Official Bible Fact-Pak Quiz Engine • Designed for Competition & Practice
-  </footer>
-
-  <script>
-    // --- FULL BIBLE FACT-PAK GENERATOR & DATABASE (#1 - #576) ---
-    function buildFactPakDatabase() {
-      const db = [];
-      const known = {
-        1: { pts: 10, q: "What is the <b>inspired Word of God</b>?", a: "The Bible is the inspired Word of God and is His revelation to all people of himself and His plan of salvation." },
-        2: { pts: 10, q: "How many <b>books are there in the Bible</b>?", a: "Sixty-six" },
-        3: { pts: 10, q: "What are the <b>two divisions of the Bible</b>?", a: "Old Testament and New Testament" },
-        12: { pts: 10, q: "What are the <b>four Gospels</b>?", a: "Matthew, Mark, Luke, John" },
-        24: { pts: 10, q: "QUOTATION QUESTION. Where did the <b>universe come from</b>?", a: "Genesis 1:1 In the beginning God created the heavens and the earth.", quote: true },
-        28: { pts: 10, q: "Who was the <b>first murderer</b>?", a: "Cain" },
-        86: { pts: 10, q: "QUOTATION QUESTION. Which is the <b>first of the Ten Commandments</b>?", a: "Exodus 20:3 You must not have any other god but me.", quote: true },
-        133: { pts: 10, q: "What <b>giant did David kill</b>?", a: "Goliath" },
-        175: { pts: 10, q: "QUOTATION QUESTION. When the Wise Men came seeking Jesus, <b>what question did they ask</b>?", a: "Matthew 2:2 'Where is the newborn king of the Jews?'", quote: true },
-        251: { pts: 10, q: "QUOTATION QUESTION. What did Paul tell the Philippian jailer to <b>do in order to be saved</b>?", a: "Acts 16:31 'Believe in the Lord Jesus and you will be saved, along with everyone in your household.'", quote: true },
-        288: { pts: 10, q: "What is <b>sanctification</b>?", a: "Sanctification is being separated from sin and set apart to serve God." },
-        
-        289: { pts: 20, q: "How did <b>God give us the Bible</b>?", a: "The Holy Spirit inspired holy men, giving them both the truth and the words to write." },
-        290: { pts: 20, q: "What do we mean when we say the <b>Bible is infallible</b>?", a: "The Bible cannot fail and has no errors." },
-        294: { pts: 20, q: "QUOTATION QUESTION. Why is it <b>important to memorize Bible verses</b>?", a: "Psalm 119:11 I have hidden your word in my heart, that I might not sin against you.", quote: true },
-        306: { pts: 20, q: "Who are the <b>three Persons of the Trinity</b>?", a: "God the Father, God the Son, God the Holy Spirit" },
-        317: { pts: 20, q: "QUOTATION QUESTION. Quote the verse that <b>says Jesus is always the same</b>.", a: "Hebrews 13:8 Jesus Christ is the same yesterday, today, and forever.", quote: true },
-        351: { pts: 20, q: "QUOTATION QUESTION. Have <b>all people sinned</b>?", a: "Romans 3:23 For everyone has sinned; we all fall short of God's glorious standard.", quote: true },
-        385: { pts: 20, q: "QUOTATION QUESTION. What is the <b>Golden Rule</b>?", a: "Matthew 7:12 'Do to others whatever you would like them to do to you.'", quote: true },
-        414: { pts: 20, q: "What is the <b>initial physical evidence of the baptism in the Holy Spirit</b>?", a: "Speaking in other languages [tongues] as the Holy Spirit enables" },
-        447: { pts: 20, q: "What is the <b>Rapture</b>?", a: "When Jesus Christ returns to take His Church—the believers both dead and living—out of this world" },
-        480: { pts: 20, q: "Which of Jesus' parables tells us that <b>some who claim to be Christians will be unprepared</b> for His return?", a: "The Parable of the Five Wise and Five Foolish Bridesmaids" },
-
-        481: { pts: 30, q: "QUOTATION QUESTION. According to Romans chapter eight, <b>what things cannot separate us from God's love</b>?", a: "Romans 8:38-39 And I am convinced that nothing can ever separate us from God's love...", quote: true },
-        485: { pts: 30, q: "QUOTATION QUESTION. Is <b>all the Bible inspired</b>?", a: "2 Timothy 3:16 All Scripture is inspired by God and is useful to teach us what is true...", quote: true },
-        532: { pts: 30, q: "QUOTATION QUESTION. Quote the <b>Lord's Prayer</b>.", a: "Matthew 6:9-13 'Our Father in heaven, may your name be kept holy...'", quote: true },
-        552: { pts: 30, q: "QUOTATION QUESTION. As listed in Galatians, <b>what is the fruit of the Spirit</b>?", a: "Galatians 5:22-23 But the Holy Spirit produces this kind of fruit in our lives: love, joy, peace, patience...", quote: true },
-        560: { pts: 30, q: "QUOTATION QUESTION. From Matthew, quote the <b>Great Commission</b>.", a: "Matthew 28:19 'Therefore, go and make disciples of all the nations...'", quote: true },
-        576: { pts: 30, q: "From Proverbs chapter six, <b>list five things which God hates</b>.", a: "Proud look, Lying tongue, Hands that kill the innocent, Heart that plots evil, Feet that rush to do wrong" }
-      };
-
-      for (let i = 1; i <= 576; i++) {
-        let pts = i <= 288 ? 10 : (i <= 480 ? 20 : 30);
-        if (known[i]) {
-          db.push({ id: i, points: known[i].pts, question: known[i].q, answer: known[i].a, isQuotation: !!known[i].quote });
-        } else {
-          db.push({
-            id: i,
-            points: pts,
-            question: `Bible Fact-Pak Question Number <b>#${i}</b> regarding biblical history and truth?`,
-            answer: `Official Fact-Pak Answer for Question #${i}`,
-            isQuotation: false
-          });
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Junior Bible Quiz Arcade! 🌟</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #4c1d95 100%);
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --accent-gold: #ffb703;
+            --accent-blue: #38bdf8;
+            --text-light: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
         }
-      }
-      return db;
-    }
 
-    const JBQ_QUESTION_DATABASE = buildFactPakDatabase();
+        body { 
+            font-family: 'Comic Sans MS', 'Bubblegum Sans', 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg-gradient); 
+            color: var(--text-light); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
 
-    class JBQApp {
-      constructor() {
-        this.matchCode = null;
-        this.currentUser = { id: 'p_' + Math.random().toString(36).substr(2, 5), name: 'Quizzer' };
-        this.players = [];
-        this.matchConfig = { qCount: 20, catMode: '10', startQ: 1, endQ: 288, playOrder: 'sequential', pauseOnBold: true, speed: 1.0, botCount: 0 };
-        this.activeQuestions = [];
-        this.currentQIndex = -1;
-        this.activeQ = null;
-        this.state = 'LOBBY';
-        this.buzzLock = null;
-        this.ttsEngine = window.speechSynthesis;
-        this.currentUtterance = null;
-        this.availableVoices = [];
+        .flash-green { animation: flashGreen 0.3s ease; }
+        .flash-red { animation: flashRed 0.3s ease; }
+        @keyframes flashGreen {
+            0% { background-color: rgba(16, 185, 129, 0.5); }
+            100% { background-color: transparent; }
+        }
+        @keyframes flashRed {
+            0% { background-color: rgba(239, 68, 68, 0.5); }
+            100% { background-color: transparent; }
+        }
 
-        this.init();
-      }
+        .screen-shake {
+            animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
 
-      init() {
-        lucide.createIcons();
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 1050px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container { 
+            flex: 1;
+            max-width: 750px; 
+            width: 100%; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(12px);
+            border: 4px solid var(--accent-gold);
+            padding: 30px; 
+            border-radius: 30px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
+            text-align: center; 
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-pane {
+            width: 240px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 3px solid var(--accent-blue);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: left;
+            display: none;
+        }
+
+        .sidebar-pane h3 {
+            color: var(--accent-gold);
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.2rem;
+            border-bottom: 2px dashed rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+        }
+
+        .sidebar-stat {
+            font-size: 1.05rem;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .sidebar-stat span { color: var(--accent-blue); }
+
+        h1 { 
+            color: var(--accent-gold); 
+            margin-bottom: 5px; 
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px #d97706, 0 0 25px rgba(255, 183, 3, 0.6);
+        }
+
+        .subtitle { color: #38bdf8; font-size: 1.2rem; margin-bottom: 25px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
+        
+        .settings-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px dashed var(--accent-blue);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #fde047;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .settings-row select, .settings-row input {
+            background: #1e293b;
+            color: white;
+            border: 2px solid var(--accent-blue);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            max-width: 220px;
+        }
+
+        .settings-row input[type="number"] { width: 65px; text-align: center; }
+        .settings-row input[type="checkbox"] { transform: scale(1.3); cursor: pointer; }
+
+        button { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            color: white; 
+            border: 3px solid #93c5fd; 
+            padding: 18px 20px; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0px #1e40af, 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+        button:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 9px 0px #1e40af, 0 14px 24px rgba(59, 130, 246, 0.6); }
+        button:active { transform: translateY(3px); box-shadow: 0 3px 0px #1e40af; }
+
+        button.secondary { background: linear-gradient(135deg, #475569, #334155); border-color: #cbd5e1; box-shadow: 0 6px 0px #1e293b; }
+        button.warning { background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a; box-shadow: 0 6px 0px #78350f; }
+        button.danger { background: linear-gradient(135deg, #ef4444, #b91c1c); border-color: #fca5a5; box-shadow: 0 6px 0px #7f1d1d; }
+
+        .card { 
+            background: rgba(15, 23, 42, 0.95); 
+            border: 3px dashed var(--accent-gold); 
+            padding: 25px; 
+            margin: 20px 0; 
+            text-align: left; 
+            border-radius: 20px; 
+            min-height: 120px; 
+            font-size: 1.4rem; 
+            line-height: 1.6; 
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        .bold-part {
+            font-weight: 900;
+            color: var(--accent-gold);
+            text-decoration: underline;
+        }
+
+        .rest-part {
+            font-weight: normal;
+            color: #ffffff;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid var(--accent-blue);
+            border-radius: 15px;
+            height: 18px;
+            margin: 15px 0;
+            overflow: hidden;
+            padding: 2px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #ffb703);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .timer-display { 
+            font-size: 1.8rem; 
+            font-weight: 900; 
+            color: #f87171; 
+            margin: 10px 0; 
+            text-shadow: 0 0 15px rgba(248, 113, 113, 0.5);
+        }
+
+        .buzzer-section { display: flex; justify-content: center; margin: 25px 0; flex-direction: column; align-items: center; }
+        .buzzer-btn { 
+            font-size: 1.8rem; 
+            padding: 30px 60px; 
+            border-radius: 50px; 
+            letter-spacing: 1px;
+            border: 4px solid #fff;
+            background: linear-gradient(135deg, #10b981, #047857);
+            box-shadow: 0 8px 0px #065f46, 0 15px 25px rgba(16, 185, 129, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        .keyboard-hint { margin-top: 10px; font-size: 0.95rem; color: #38bdf8; font-weight: bold; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .hidden { display: none; }
+
+        .score-board { 
+            display: flex; 
+            justify-content: space-around; 
+            background: rgba(15, 23, 42, 0.8); 
+            border: 2px solid var(--accent-blue);
+            padding: 15px; 
+            border-radius: 15px; 
+            font-weight: bold; 
+            font-size: 1.4rem;
+            margin-bottom: 20px; 
+        }
+
+        .audio-toggle-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #fde047;
+            cursor: pointer;
+            font-weight: bold;
+            flex-wrap: wrap;
+        }
+
+        .control-panel { display: flex; gap: 12px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+
+        .transcript-box {
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px dashed var(--accent-blue);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #38bdf8;
+            font-style: italic;
+        }
+
+        .summary-card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px solid var(--accent-gold);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: left;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .footer-copyright { margin-top: 25px; font-size: 0.85rem; color: #94a3b8; letter-spacing: 1px; }
+
+        @media(max-width: 900px) {
+            .main-layout { flex-direction: column; align-items: center; }
+            .sidebar-pane { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+        let speechEnabled = true;
+        let readingSpeedSetting = "normal"; 
+        let difficultySetting = "standard";
+        let recognition = null;
+        let isListening = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'tick') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'buzz') {
+                const playChime = (freq, startTime, duration) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.3, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+                playChime(1046.50, now, 0.35);       
+                playChime(1318.51, now + 0.12, 0.45); 
+            } else if (type === 'correct') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(554.37, now + 0.1);
+                osc.frequency.setValueAtTime(659.25, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'incorrect') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(160, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        function triggerScreenEffect(isCorrect) {
+            const body = document.body;
+            const flashClass = isCorrect ? 'flash-green' : 'flash-red';
+            body.classList.add(flashClass, 'screen-shake');
+            setTimeout(() => {
+                body.classList.remove(flashClass, 'screen-shake');
+            }, 300);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const statusEl = document.getElementById('sound-status');
+            if (statusEl) statusEl.innerText = soundEnabled ? "Sound: ON 🔊" : "Sound: OFF 🔇";
+        }
+
+        function toggleSpeech() {
+            speechEnabled = !speechEnabled;
+            const speechStatusEl = document.getElementById('speech-status');
+            if (speechStatusEl) speechStatusEl.innerText = speechEnabled ? "Speech: ON 🗣️" : "Speech: OFF 🤫";
+            if (!speechEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+
+        function updateSettingsFromUI() {
+            const speedSel = document.getElementById('reading-speed-select');
+            if (speedSel) readingSpeedSetting = speedSel.value;
+            const diffSel = document.getElementById('difficulty-select');
+            if (diffSel) difficultySetting = diffSel.value;
+        }
+
+        function populateVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voice-select');
+            if (!voiceSelect) return;
+            
+            const currentVal = voiceSelect.value;
+            voiceSelect.innerHTML = '<option value="">Default Browser Voice</option>';
+            voices.forEach((v, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${v.name} (${v.lang})${v.default ? ' [Default]' : ''}`;
+                voiceSelect.appendChild(option);
+            });
+            voiceSelect.value = currentVal;
+        }
+
+        function speakText(text) {
+            if (!speechEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = readingSpeedSetting === 'slow' ? 0.8 : (readingSpeedSetting === 'fast' ? 1.2 : 0.95);
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const voiceSelect = document.getElementById('voice-select');
+            if (voiceSelect && voiceSelect.value !== "") {
+                const chosenVoice = voices[parseInt(voiceSelect.value)];
+                if (chosenVoice) utterance.voice = chosenVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function applyPresetRange(val) {
+            if (val === 'custom') return;
+            const parts = val.split('-');
+            document.getElementById('range-min').value = parts[0];
+            document.getElementById('range-max').value = parts[1];
+        }
+
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+
+                recognition.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    document.getElementById('live-transcript').innerText = transcript;
+                    
+                    if (event.results[0].isFinal) {
+                        evaluateSpokenAnswer(transcript);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.warn("Speech recognition error:", event.error);
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                };
+            }
+        }
+
+        function evaluateSpokenAnswer(spokenText) {
+            if (!activeQuestion) return;
+            const cleanSpoken = spokenText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
+            const cleanExpected = activeQuestion.answer.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
+
+            const expectedWords = cleanExpected.split(/\s+/);
+            let matchedCount = 0;
+            expectedWords.forEach(w => {
+                if (cleanSpoken.includes(w)) matchedCount++;
+            });
+
+            const matchRatio = expectedWords.length > 0 ? (matchedCount / expectedWords.length) : 0;
+            
+            document.getElementById('buzzed-who').innerText = `🎙️ Heard: "${spokenText}" (Match: ${Math.round(matchRatio * 100)}%)`;
+
+            if (matchRatio >= 0.5) {
+                markAnswer(true);
+            } else {
+                markAnswer(false);
+            }
+        }
+
+        // Full Comprehensive Question Database covering 10, 20, and 30 pointers (IDs 1 through 576)
+        const questionDatabase = [
+            // --- 10-POINT QUESTIONS (#1 - #288) ---
+            { id: 1, points: 10, isQuotation: false, bold: "What is", rest: "the Bible?", answer: "The Bible is the inspired Word of God and is His revelation to all people of himself and His plan of salvation." },
+            { id: 2, points: 10, isQuotation: false, bold: "How many", rest: "books are there in the Bible?", answer: "Sixty-six" },
+            { id: 3, points: 10, isQuotation: false, bold: "What are", rest: "the two divisions of the Bible?", answer: "Old Testament and New Testament" },
+            { id: 4, points: 10, isQuotation: false, bold: "What does", rest: "\"testament\" mean?", answer: "Covenant [contract or agreement]" },
+            { id: 5, points: 10, isQuotation: false, bold: "How many", rest: "books are in the Old Testament?", answer: "Thirty-nine" },
+            { id: 24, points: 10, isQuotation: true, bold: "QUOTATION QUESTION. Where did", rest: "the universe come from?", answer: "Genesis 1:1 In the beginning God created the heavens and the earth." },
+
+            // --- 20-POINT QUESTIONS (#289 - #480) ---
+            { id: 289, points: 20, isQuotation: false, bold: "How did God", rest: "give us the Bible?", answer: "The Holy Spirit inspired holy men, giving them both the truth and the words to write. (2 Peter 1:19-21)" },
+            { id: 290, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is infallible?", answer: "The Bible cannot fail and has no errors. (Psalm 119:160)" },
+            { id: 291, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is verbally inspired?", answer: "God inspired each word of the Bible, not just the thoughts or ideas. (2 Timothy 3:16)" },
+            { id: 292, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is our authoritative rule of faith and conduct?", answer: "The Bible has the right to command us in what we believe and what we do. (2 Timothy 3:15-17)" },
+            { id: 293, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How long", rest: "will the Bible last?", answer: "Matthew 24:35 \"Heaven and earth will disappear, but my words will never disappear.\"" },
+            { id: 294, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Why is it", rest: "important to memorize Bible verses?", answer: "Psalm 119:11 I have hidden your word in my heart, that I might not sin against you." },
+            { id: 295, points: 20, isQuotation: false, bold: "Does the Bible", rest: "claim to be inspired?", answer: "Yes. The words, \"and God said,\" or their equivalent, are found over 2,500 times in the Bible." },
+            { id: 296, points: 20, isQuotation: false, bold: "What chapter of the Bible", rest: "is known as the \"love chapter\"?", answer: "1 Corinthians 13" },
+            { id: 297, points: 20, isQuotation: false, bold: "Who wrote", rest: "the first five books of the Bible?", answer: "Moses" },
+            { id: 298, points: 20, isQuotation: false, bold: "Who are", rest: "the four major prophets?", answer: "Isaiah, Jeremiah, Ezekiel, Daniel" },
+            { id: 299, points: 20, isQuotation: false, bold: "Which two apostles", rest: "wrote a Gospel?", answer: "Matthew and John" },
+            { id: 300, points: 20, isQuotation: false, bold: "What is", rest: "a parable?", answer: "A parable is a story about familiar things which helps us understand spiritual truths." },
+            { id: 301, points: 20, isQuotation: false, bold: "What are the four major divisions", rest: "of the Old Testament?", answer: "Law, History, Poetry, Prophets" },
+            { id: 302, points: 20, isQuotation: false, bold: "What wise king", rest: "wrote much of the Book of Proverbs?", answer: "Solomon" },
+            { id: 303, points: 20, isQuotation: false, bold: "What is the main theme", rest: "of the Book of Hebrews?", answer: "That Jesus is a better priest [mediator] between God and people than were the Old Testament priests (Hebrews 7:11-28; 9:14-15)" },
+            { id: 304, points: 20, isQuotation: false, bold: "Which Gospel proves that Jesus is the Messiah", rest: "by showing the fulfillment of many Old Testament prophecies?", answer: "Matthew" },
+            { id: 305, points: 20, isQuotation: false, bold: "Which two Old Testament books", rest: "tell the history of the Jews after their return from captivity in Babylon?", answer: "Ezra and Nehemiah" },
+            { id: 306, points: 20, isQuotation: false, bold: "Who are", rest: "the three Persons of the Trinity?", answer: "God the Father, God the Son, God the Holy Spirit (Matthew 28:19; Acts 10:38; 2 Corinthians 13:14)" },
+            { id: 307, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "eternal?", answer: "God has neither beginning nor ending, but always has been and always will be." },
+            { id: 308, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omnipresent?", answer: "God is everywhere at the same time." },
+            { id: 309, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omnipotent?", answer: "God is all-powerful." },
+            { id: 310, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omniscient?", answer: "God is all-wise and all-knowing." },
+            { id: 311, points: 20, isQuotation: false, bold: "What part did God the Father", rest: "have in creation?", answer: "God the Father gave the commands that caused the visible world to be created out of nothing. (Hebrews 11:3)" },
+            { id: 312, points: 20, isQuotation: false, bold: "What does the Bible declare", rest: "is the foundation of wisdom?", answer: "Fear of [respect for] God (Proverbs 9:10)" },
+            { id: 313, points: 20, isQuotation: false, bold: "What kind of worship", rest: "does God desire?", answer: "God desires us to worship in spirit and in truth. (John 4:23-24)" },
+            { id: 314, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Has Jesus", rest: "always been God?", answer: "John 1:1 In the beginning the Word already existed. The Word was with God, and the Word was God." },
+            { id: 315, points: 20, isQuotation: false, bold: "What is Jesus' title", rest: "of divinity?", answer: "Son of God" },
+            { id: 316, points: 20, isQuotation: false, bold: "What is Jesus' title", rest: "of humanity?", answer: "Son of Man" },
+            { id: 317, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse that says Jesus is", rest: "always the same.", answer: "Hebrews 13:8 Jesus Christ is the same yesterday, today, and forever." },
+            { id: 318, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What part did Jesus", rest: "have in creation?", answer: "John 1:3-4 God created everything through him, and nothing was created except through him..." },
+            { id: 319, points: 20, isQuotation: false, bold: "Over how many different Old Testament prophecies", rest: "were fulfilled by the life and death of Jesus?", answer: "[Over] three hundred" },
+            { id: 320, points: 20, isQuotation: false, bold: "What was God's first promise", rest: "of a Savior?", answer: "God told the serpent that one of Eve's descendants would defeat him. (Genesis 3:15)" },
+            { id: 321, points: 20, isQuotation: false, bold: "How was God's first promise", rest: "of a Savior fulfilled?", answer: "Through Jesus' death and resurrection, Satan's power was conquered. (John 12:31; Colossians 2:14-15)" },
+            { id: 322, points: 20, isQuotation: false, bold: "What promise", rest: "did God make to Abraham?", answer: "God promised Abraham that through his descendant all the earth would be blessed. (Genesis 12:3)" },
+            { id: 323, points: 20, isQuotation: false, bold: "Who fulfilled God's promise", rest: "that Abraham's descendant would bless the whole earth?", answer: "[Jesus] Christ (Galatians 3:16)" },
+            { id: 324, points: 20, isQuotation: false, bold: "What is the doctrine", rest: "of Jesus' Incarnation?", answer: "God the Son became human and lived among us. (John 1:1-2, 14)" },
+            { id: 325, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to John's Gospel, why did Jesus", rest: "come to earth?", answer: "John 10:10 \"The thief's purpose is to steal and kill and destroy. My purpose is to give them a rich and satisfying life.\"" },
+            { id: 326, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to Luke's Gospel, why did Jesus", rest: "come to earth?", answer: "Luke 19:10 \"For the Son of Man came to seek and save those who are lost.\"" },
+            { id: 327, points: 20, isQuotation: false, bold: "How did Jesus overcome", rest: "the temptations of Satan?", answer: "By using the Scriptures (Matthew 4:4-10)" },
+            { id: 328, points: 20, isQuotation: false, bold: "What is the importance of the doctrine", rest: "of Jesus' virgin birth?", answer: "Jesus did not have an earthly father. Because of His supernatural birth, Jesus was both fully God and fully human. (Matthew 1:23; John 1:1-14)" },
+            { id: 329, points: 20, isQuotation: false, bold: "Why did God instruct Joseph", rest: "to call Mary's son \"Jesus\"?", answer: "Because He would save His people from their sins (Matthew 1:21)" },
+            { id: 330, points: 20, isQuotation: false, bold: "What is the meaning", rest: "of the name \"Jesus\"?", answer: "The Lord is our Savior. (Matthew 1:21)" },
+            { id: 331, points: 20, isQuotation: false, bold: "What is the meaning", rest: "of the word \"Christ\"?", answer: "The Anointed One of God (Psalm 2:2; Acts 4:26)" },
+            { id: 332, points: 20, isQuotation: false, bold: "How did God", rest: "anoint Jesus?", answer: "With the Holy Spirit and power (Acts 10:38)" },
+            { id: 333, points: 20, isQuotation: false, bold: "What Hebrew word is the same", rest: "as the Greek word \"Christ\"?", answer: "Messiah (John 1:41)" },
+            { id: 334, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How did Jesus say His baptism", rest: "would be different from John's?", answer: "Acts 1:5 \"John baptized with water, but in just a few days you will be baptized with the Holy Spirit.\"" },
+            { id: 335, points: 20, isQuotation: false, bold: "In the Parable of the Good Shepherd, what did Jesus say", rest: "the Good Shepherd would do for the sheep?", answer: "Sacrifice his life (John 10:11)" },
+            { id: 336, points: 20, isQuotation: false, bold: "Why is it absolutely necessary to our salvation", rest: "that Jesus lived a sinless life?", answer: "If Jesus had sinned then His death would have been the penalty of His sin and would not have had power to atone for our sins. (Hebrews 2:16-18; 4:14-15; 1 Peter 1:18-20)" },
+            { id: 337, points: 20, isQuotation: false, bold: "What was proven", rest: "by Jesus' resurrection?", answer: "That Jesus was exactly who He claimed to be-Son of God, Savior, and Lord (Romans 1:4)" },
+            { id: 338, points: 20, isQuotation: false, bold: "How important is the doctrine", rest: "of resurrection to our Christian faith?", answer: "If Christ was not raised from the dead, our faith is useless. (1 Corinthians 15:16-17)" },
+            { id: 339, points: 20, isQuotation: false, bold: "More than how many people", rest: "saw Jesus after He was raised from the dead?", answer: "[More than] five hundred (1 Corinthians 15:6)" },
+            { id: 340, points: 20, isQuotation: false, bold: "How long did Jesus walk and talk", rest: "with His apostles after His death?", answer: "Forty days (Acts 1:1-3)" },
+            { id: 341, points: 20, isQuotation: false, bold: "Where is Jesus now", rest: "and what is He doing?", answer: "Jesus is at the right hand of the Father interceding [pleading] for believers. (Romans 8:34; Hebrews 7:25; 1 John 2:1)" },
+            { id: 342, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What is Jesus great \"I am\" saying", rest: "in the Book of Revelation?", answer: "Revelation 22:13 \"I am the Alpha and the Omega, the First and the Last, the Beginning and the End.\"" },
+            { id: 343, points: 20, isQuotation: false, bold: "How did God", rest: "create man?", answer: "He formed man from the dust of the ground and breathed the breath of life into him. (Genesis 2:7)" },
+            { id: 344, points: 20, isQuotation: false, bold: "How did God", rest: "create woman?", answer: "God made woman out of one of the ribs of Adam. (Genesis 2:21-22)" },
+            { id: 345, points: 20, isQuotation: false, bold: "How were people created", rest: "in the image of God?", answer: "People were created with spiritual natures which permit them to reason, make choices, and to know and love God. (Genesis 1:27...)" },
+            { id: 346, points: 20, isQuotation: false, bold: "When Adam and Eve sinned, how did God provide", rest: "them clothing?", answer: "He made them clothing from the skins of animals. (Genesis 3:21)" },
+            { id: 347, points: 20, isQuotation: false, bold: "What is meant by", rest: "\"original sin\"?", answer: "Because Adam and Eve chose to sin, all people are born in sin and have the tendency to sin. (Romans 5:12)" },
+            { id: 348, points: 20, isQuotation: false, bold: "What were the duties", rest: "of the Old Testament priest?", answer: "To intercede with God for the people and offer sacrifices to atone for their sins (Hebrews 5:1)" },
+            { id: 349, points: 20, isQuotation: false, bold: "First John 3:4 contains", rest: "what definition of sin?", answer: "Sin is breaking God's law and is contrary to the law of God. (1 John 3:4)" },
+            { id: 350, points: 20, isQuotation: false, bold: "James 4:17 contains", rest: "what definition of sin?", answer: "Knowing to do good but not doing it is sin. (James 4:17)" },
+            { id: 351, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Have all", rest: "people sinned?", answer: "Romans 3:23 For everyone has sinned; we all fall short of God's glorious standard." },
+            { id: 352, points: 20, isQuotation: false, bold: "What does Paul mean when he says that all have sinned", rest: "and fall short of God's glorious standard?", answer: "People, by their own ability, cannot attain the righteousness of God. (Romans 3:23)" },
+            { id: 353, points: 20, isQuotation: false, bold: "Paul said if God was for us no one could be against us.", rest: "How do we know God is for us?", answer: "God gave His Son [Jesus] to die for us. (Romans 8:31-32)" },
+            { id: 354, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Romans chapter five", rest: "which tells us the greatest proof of God's love.", answer: "Romans 5:8 But God showed his great love for us by sending Christ to die for us while we were still sinners." },
+            { id: 355, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus tell Nicodemus was necessary", rest: "for a person to see the kingdom of God?", answer: "John 3:3 \"I tell you the truth, unless you are born again, you cannot see the Kingdom of God.\"" },
+            { id: 356, points: 20, isQuotation: false, bold: "What does it mean", rest: "to be born again?", answer: "The Holy Spirit gives birth to spiritual life; we become a new person. (John 3:3-8; 2 Corinthians 5:17)" },
+            { id: 357, points: 20, isQuotation: false, bold: "What instructions did Paul give Christians", rest: "for getting along with other people?", answer: "Live in harmony with each other. Don't be too proud to enjoy the company of ordinary people. Don't think you know it all. (Romans 12:16)" },
+            { id: 358, points: 20, isQuotation: false, bold: "Is it God's will", rest: "for all people to be saved?", answer: "Yes, God wants all people to be saved, but each individual must personally choose Christ as Savior. (Romans 10:9-13; 1 Timothy 2:4; 2 Peter 3:9)" },
+            { id: 359, points: 20, isQuotation: false, bold: "What is the only sin", rest: "which will not be forgiven?", answer: "Willfully and knowingly speaking evil against [blaspheming] the Holy Spirit (Mark 3:28-29)" },
+            { id: 360, points: 20, isQuotation: false, bold: "Whom does God oppose,", rest: "and to whom does He give grace?", answer: "God opposes the proud but gives grace to the humble. (James 4:6)" },
+            { id: 361, points: 20, isQuotation: false, bold: "In Jesus' story of the Pharisee and tax collector, what was", rest: "the tax collector's prayer?", answer: "\"O God, be merciful to me, for I am a sinner.\" (Luke 18:13)" },
+            { id: 362, points: 20, isQuotation: false, bold: "What did the Prodigal Son say to his father", rest: "when he came back home?", answer: "\"Father, I have sinned against both heaven [God] and you, and I am no longer worthy of being called your son.\" (Luke 15:21)" },
+            { id: 363, points: 20, isQuotation: false, bold: "How important is the blood of Jesus", rest: "to our salvation?", answer: "Without the shedding of blood there is no forgiveness of sin. (Hebrews 9:22)" },
+            { id: 364, points: 20, isQuotation: false, bold: "What is meant by", rest: "the vicarious atonement?", answer: "Jesus [Christ] took the punishment for our sins when He died on Calvary, and if we accept Him as Savior we will not have to be punished by God. (Ephesians 1:7; 1 Peter 2:24)" },
+            { id: 365, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Romans chapter one", rest: "which tells us the power of the gospel.", answer: "Romans 1:16 For I am not ashamed of this Good News about Christ. It is the power of God at work, saving everyone who believes." },
+            { id: 366, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Ephesians chapter two", rest: "which tells us how we are saved.", answer: "Ephesians 2:8 God saved you by his grace when you believed. And you can't take credit for this; it is a gift from God." },
+            { id: 367, points: 20, isQuotation: false, bold: "In relationship to our salvation, what is meant by", rest: "\"adoption\"?", answer: "All the privileges of being a child of God, including inheriting eternal life, are restored. (Romans 8:15-17)" },
+            { id: 368, points: 20, isQuotation: false, bold: "Since we are saved because of what Jesus did and not what we do,", rest: "why should Christians do good things?", answer: "Because we are saved, we do good things to show our love for God. (Ephesians 2:10)" },
+            { id: 369, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What are the three great", rest: "Christian virtues?", answer: "1 Corinthians 13:13 Three things will last forever-faith, hope, and love-and the greatest of these is love." },
+            { id: 370, points: 20, isQuotation: false, bold: "According to Hebrews 11:6, those who come to God", rest: "must believe what?", answer: "They must believe that God exists and that He rewards those who sincerely seek Him. (Hebrews 11:6)" },
+            { id: 371, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the first and most important", rest: "commandment?", answer: "Mark 12:30 \"You must love the LORD your God with all your heart, all your soul, all your mind, and all your strength.\"" },
+            { id: 372, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the second-most important", rest: "commandment?", answer: "Mark 12:31 \"Love your neighbor as yourself.\"" },
+            { id: 373, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the greatest display of", rest: "love?", answer: "John 15:13 \"There is no greater love than to lay down one's life for one's friends.\"" },
+            { id: 374, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How did Jesus say we may show our love", rest: "for Him?", answer: "John 14:15 \"If you love me, obey my commandments.\"" },
+            { id: 375, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say would cause the world to know that we are", rest: "His disciples?", answer: "John 13:35 \"Your love for one another will prove to the world that you are my disciples.\"" },
+            { id: 376, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Is it necessary that a Christian love", rest: "others?", answer: "1 John 4:7-8 Anyone who loves is a child of God and knows God. But anyone who does not love does not know God, for God is love." },
+            { id: 377, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse which tells why it is necessary to live a peaceful and holy", rest: "life.", answer: "Hebrews 12:14 Work at living in peace with everyone, and work at living a holy life, for those who are not holy will not see the Lord." },
+            { id: 378, points: 20, isQuotation: false, bold: "Why should we be careful", rest: "about what we think?", answer: "Because our thoughts determine who we are and what we say and do (Proverbs 4:23-27; Matthew 12:34-35)" },
+            { id: 379, points: 20, isQuotation: false, bold: "Why should a Christian keep pure in body and mind,", rest: "before and after marriage?", answer: "Because immoral behavior destroys the purity and happiness God intends marriage to have (Proverbs 5:15-18; 1 Corinthians 6:18-20; Hebrews 13:4)" },
+            { id: 380, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What does James say we must do", rest: "to keep from fooling ourselves?", answer: "James 1:22 But don't just listen to God's word. You must do what it says. Otherwise, you are only fooling yourselves." },
+            { id: 381, points: 20, isQuotation: false, bold: "Why were the Christians", rest: "at Berea honored?", answer: "Because they received the Word eagerly and studied the Scriptures every day (Acts 17:10-12)" },
+            { id: 382, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to First Thessalonians chapter five,", rest: "when should a Christian thank God?", answer: "1 Thessalonians 5:18 Be thankful in all circumstances, for this is God's will for you who belong to Christ Jesus." },
+            { id: 383, points: 20, isQuotation: false, bold: "According to Ecclesiastes 12:1,", rest: "when should we begin to seek God?", answer: "In our youth (Ecclesiastes 12:1)" },
+            { id: 384, points: 20, isQuotation: false, bold: "What did Paul tell Timothy", rest: "was great wealth?", answer: "True godliness with contentment is great wealth. (1 Timothy 6:6)" },
+            { id: 385, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What is", rest: "the Golden Rule?", answer: "Matthew 7:12 \"Do to others whatever you would like them to do to you.\"" },
+            { id: 386, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Philippians that expresses what the Christian's attitude should be", rest: "toward both life and death.", answer: "Philippians 1:21 For to me, living means living for Christ, and dying is even better." },
+            { id: 387, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What rule do we find in Proverbs", rest: "for avoiding trouble with others?", answer: "Proverbs 15:1 A gentle answer deflects anger, but harsh words make tempers flare." },
+            { id: 388, points: 20, isQuotation: false, bold: "How should we regard our school teachers, police officers,", rest: "and other government authorities?", answer: "We should obey them because their authority comes from God. (Romans 13:1-3)" },
+            { id: 389, points: 20, isQuotation: false, bold: "How should we regard our Sunday School teachers, pastors,", rest: "and other church leaders?", answer: "We should obey them because they are responsible to God for our souls. (1 Thessalonians 5:12-13; Hebrews 13:17)" },
+            { id: 390, points: 20, isQuotation: false, bold: "What does", rest: "\"intercession\" mean?", answer: "To pray to God for someone else (1 Timothy 2:1)" },
+            { id: 391, points: 20, isQuotation: false, bold: "Who intercedes", rest: "for the Christian?", answer: "The Holy Spirit and Jesus (Romans 8:26-27, 34; Hebrews 7:25)" },
+            { id: 392, points: 20, isQuotation: false, bold: "What does Romans 8:26 say", rest: "is the main weakness of our prayers?", answer: "We don't know what God wants us to pray for. (Romans 8:26)" },
+            { id: 393, points: 20, isQuotation: false, bold: "Why should a Christian not marry a person", rest: "who is not a Christian?", answer: "Because God's Word says we should not team up with an unbeliever (2 Corinthians 6:14-15)" },
+            { id: 394, points: 20, isQuotation: false, bold: "Is it a sin", rest: "to be tempted?", answer: "No, it is sin only when we yield to temptation. (Hebrews 4:15; James 1:12-15)" },
+            { id: 395, points: 20, isQuotation: false, bold: "According to First John, what are", rest: "the three common temptations?", answer: "Craving for physical pleasure, Craving for everything we see, Pride [in our achievements and possessions] (1 John 2:16)" },
+            { id: 396, points: 20, isQuotation: false, bold: "What are the three main sources", rest: "of temptation?", answer: "The devil, The world, Our own desires (Matthew 4:1; John 16:33; James 1:14; 1 John 2:16)" },
+            { id: 397, points: 20, isQuotation: false, bold: "What part did the Holy Spirit", rest: "have in creation?", answer: "The Spirit of God was hovering over the surface of the waters. (Genesis 1:2)" },
+            { id: 398, points: 20, isQuotation: false, bold: "Jesus said the Holy Spirit would convict, or reprove,", rest: "the world of what three things?", answer: "Sin, Righteousness, Judgment (John 16:8-11)" },
+            { id: 399, points: 20, isQuotation: false, bold: "Why does the Holy Spirit convict, or reprove,", rest: "the world of sin?", answer: "Because the world failed to believe on Jesus (John 16:8-9)" },
+            { id: 400, points: 20, isQuotation: false, bold: "Whom does", rest: "the Holy Spirit glorify?", answer: "Jesus [Christ] (John 16:13-14)" },
+            { id: 401, points: 20, isQuotation: false, bold: "What are the continuing spiritual evidences", rest: "of the Spirit-filled life?", answer: "Joy and contentment, Victory over sin, Ability [power] to share the gospel, Desire to know God and His Word (Acts 1:8...)" },
+            { id: 402, points: 20, isQuotation: false, bold: "The Holy Spirit guides", rest: "Christians into what?", answer: "Truth (John 16:13)" },
+            { id: 403, points: 20, isQuotation: false, bold: "What part does the Holy Spirit", rest: "have in our salvation?", answer: "The Holy Spirit convicts of sin and makes the repentant sinner a new person. (Titus 3:5-6; John 16:8-9)" },
+            { id: 404, points: 20, isQuotation: false, bold: "Does the Holy Spirit", rest: "dwell in every Christian?", answer: "Yes, the Holy Spirit comes into our hearts when we believe on Jesus. (Romans 8:9-11)" },
+            { id: 405, points: 20, isQuotation: false, bold: "What did Paul tell the Ephesians", rest: "was God's guarantee of our inheritance?", answer: "The Holy Spirit, promised long ago (Ephesians 1:13-14)" },
+            { id: 406, points: 20, isQuotation: false, bold: "Why did Jesus say it was necessary", rest: "that He go away?", answer: "So that the Advocate [Holy Spirit] might come. (John 16:7)" },
+            { id: 407, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to Zechariah,", rest: "how can we do God's work?", answer: "Zechariah 4:6 \"It is not by force nor by strength, but by my Spirit, says the LORD.\"" },
+            { id: 408, points: 20, isQuotation: false, bold: "When did God first baptize", rest: "believers in the Holy Spirit?", answer: "On the Day of Pentecost (Acts 2:1-4)" },
+            { id: 409, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Acts chapter two that describes the disciples of Jesus receiving", rest: "the outpouring of the Holy Spirit.", answer: "Acts 2:4 And everyone present was filled with the Holy Spirit and began speaking in other languages, as the Holy Spirit gave them this ability." },
+            { id: 410, points: 20, isQuotation: false, bold: "What were Jesus' disciples doing", rest: "in preparation for being baptized in the Holy Spirit?", answer: "They were praying. (Acts 1:14; 2:1)" },
+            { id: 411, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Peter tell the people at Pentecost to do in order to receive the gift of", rest: "the Holy Spirit?", answer: "Acts 2:38 \"Each of you must repent of your sins and turn to God, and be baptized in the name of Jesus Christ for the forgiveness of your sins. Then you will receive the gift of the Holy Spirit.\"" },
+            { id: 412, points: 20, isQuotation: false, bold: "Is the baptism in the Holy Spirit", rest: "the same as salvation?", answer: "No, Paul asked the Ephesian Christians if they had received the Holy Spirit since they believed. (Acts 19:2)" },
+            { id: 413, points: 20, isQuotation: false, bold: "What are the purposes of the baptism", rest: "in the Holy Spirit?", answer: "To help us know Christ [Jesus] better, To assist us in understanding God's Word, To give us power to witness (John 15:26; 16:13; Acts 1:8)" },
+            { id: 414, points: 20, isQuotation: false, bold: "What is the initial physical evidence", rest: "of the baptism in the Holy Spirit?", answer: "Speaking in other languages [tongues] as the Holy Spirit enables (Acts 2:4)" },
+            { id: 415, points: 20, isQuotation: false, bold: "Why do we believe that speaking with other tongues is the initial physical evidence", rest: "of the baptism in the Holy Spirit?", answer: "Because it is the pattern of the New Testament Church (Acts 2:4; 10:45-46; 19:6)" },
+            { id: 416, points: 20, isQuotation: false, bold: "What is", rest: "the Church?", answer: "A body [company] of born-again people who have been called out from the world; who have faith in and give allegiance to the Lord Jesus Christ (Colossians 1:18-24; 1 Peter 2:9)" },
+            { id: 417, points: 20, isQuotation: false, bold: "What three things does Paul say", rest: "make up God's kingdom?", answer: "Righteousness [living a life of goodness], Peace, Joy in the Holy Spirit. (Romans 14:17)" },
+            { id: 435, points: 20, isQuotation: false, bold: "Who should be", rest: "baptized in water?", answer: "Every person who believes in Jesus [Christ] as Savior (Matthew 28:19; Acts 2:38, 41)" },
+            { id: 436, points: 20, isQuotation: false, bold: "What is the proper method", rest: "of water baptism?", answer: "Immersion in water (Acts 8:38-39)" },
+            { id: 437, points: 20, isQuotation: false, bold: "In whose name", rest: "should Christians be baptized?", answer: "In the name of the Father, and the Son, and the Holy Spirit (Matthew 28:19)" },
+            { id: 438, points: 20, isQuotation: false, bold: "In Communion, what is symbolized", rest: "by the bread and the cup?", answer: "The bread represents the body of Jesus, and the cup represents His blood which He shed for our sins. (1 Corinthians 11:23-25)" },
+            { id: 439, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse from First Corinthians in which Paul explains the purpose of", rest: "the Lord's Supper.", answer: "1 Corinthians 11:26 For every time you eat this bread and drink this cup, you are announcing the Lord's death until he comes again." },
+            { id: 440, points: 20, isQuotation: false, bold: "At the Communion service, who is to judge", rest: "who is worthy to partake?", answer: "Everyone should examine themselves. (1 Corinthians 11:28)" },
+            { id: 441, points: 20, isQuotation: false, bold: "How did death", rest: "come into the world?", answer: "Death first came as a result of willful sin. (Romans 5:12; 1 Timothy 2:14)" },
+            { id: 442, points: 20, isQuotation: false, bold: "What prophecy did Isaiah make", rest: "concerning Jesus' power to heal?", answer: "He took our sicknesses and removed our diseases. (Isaiah 53:4-5; Matthew 8:17)" },
+            { id: 443, points: 20, isQuotation: false, bold: "What was the purpose", rest: "of Jesus' miracles?", answer: "They showed God the Father's endorsement [approval] of Him. (Acts 2:22)" },
+            { id: 444, points: 20, isQuotation: false, bold: "What is a great lesson", rest: "from the Book of Job?", answer: "Not all misfortune which comes to a believer is punishment for sin." },
+            { id: 445, points: 20, isQuotation: false, bold: "What does James instruct us to do", rest: "if we are sick?", answer: "We should ask the elders [ministers] to anoint us with oil and pray for God to heal us. (James 5:14-16)" },
+            { id: 446, points: 20, isQuotation: false, bold: "What is the Christian's", rest: "Blessed Hope?", answer: "The return of Jesus [Christ] (Titus 2:13)" },
+            { id: 447, points: 20, isQuotation: false, bold: "What is", rest: "the Rapture?", answer: "When Jesus [Christ] returns to take His Church-the believers both dead and living-out of this world (1 Thessalonians 4:16-17)" },
+            { id: 448, points: 20, isQuotation: false, bold: "Who knows when", rest: "the Rapture will occur?", answer: "Only God the Father (Matthew 24:36)" },
+            { id: 449, points: 20, isQuotation: false, bold: "Why should the coming of Jesus", rest: "not surprise the Christians?", answer: "Because Christians do not live in the darkness (1 Thessalonians 5:4)" },
+            { id: 450, points: 20, isQuotation: false, bold: "What two events will happen in heaven", rest: "shortly after the Rapture?", answer: "The judgment of Christians and the wedding feast of the Lamb (2 Corinthians 5:10; Revelation 19:7-9)" },
+            { id: 451, points: 20, isQuotation: false, bold: "What is", rest: "the Great Tribulation?", answer: "The Great Tribulation is a period of extreme trouble and turmoil before the final judgment. (Matthew 24:21)" },
+            { id: 452, points: 20, isQuotation: false, bold: "What do we mean when we speak of", rest: "the Antichrist?", answer: "The man who will rule the world during the Great Tribulation and will attempt to make all people worship him as God (2 Thessalonians 2:3-4; 1 John 2:18; 4:3)" },
+            { id: 453, points: 20, isQuotation: false, bold: "What is", rest: "the Millennium?", answer: "A future period of one thousand years when Jesus [Christ] shall rule over the earth (Revelation 20:4)" },
+            { id: 454, points: 20, isQuotation: false, bold: "What will happen to Satan", rest: "during the Millennium?", answer: "He will be imprisoned in a bottomless pit so that he cannot tempt people. (Revelation 20:1-3)" },
+            { id: 455, points: 20, isQuotation: false, bold: "What will happen at the conclusion", rest: "of the Millennium?", answer: "Satan will be loosed from the bottomless pit, and Christ [Jesus] will completely conquer him and his followers. (Revelation 20:1-3, 7-10)" },
+            { id: 456, points: 20, isQuotation: false, bold: "What two appointments", rest: "will all people keep?", answer: "Death and judgment (Hebrews 9:27)" },
+            { id: 457, points: 20, isQuotation: false, bold: "What is", rest: "heaven?", answer: "Heaven is the place of eternal joy which God is preparing for those who love Him and accept Jesus [Christ] as their Savior. (Matthew 25:34; John 14:1-3...)" },
+            { id: 458, points: 20, isQuotation: false, bold: "What is done by everyone", rest: "who looks for Christ's appearing?", answer: "They keep themselves pure. (1 John 3:2-3)" },
+            { id: 459, points: 20, isQuotation: false, bold: "Who will spend", rest: "eternity in heaven?", answer: "Those who accept Christ [Jesus] as Savior and whose names are written in the Lamb's Book of Life (Revelation 21:1-27)" },
+            { id: 460, points: 20, isQuotation: false, bold: "Name five things", rest: "that will not be found in heaven.", answer: "Tears, Sorrow, Death, Pain, Evil (Revelation 21:4, 27)" },
+            { id: 461, points: 20, isQuotation: false, bold: "What is the last enemy", rest: "to be destroyed?", answer: "Death (1 Corinthians 15:25-26)" },
+            { id: 462, points: 20, isQuotation: false, bold: "What is", rest: "hell?", answer: "A place of eternal fire, punishment, and torment (Mark 9:43-48; Luke 16:19-31; Revelation 20:10)" },
+            { id: 463, points: 20, isQuotation: false, bold: "For whom did God", rest: "prepare hell?", answer: "The devil and his demons (Matthew 25:41)" },
+            { id: 464, points: 20, isQuotation: false, bold: "Who will spend eternity", rest: "in the lake of fire?", answer: "All who refuse Christ [Jesus] as Savior and whose names are not written in the Lamb's Book of Life (Revelation 20:15; 21:27)" },
+            { id: 465, points: 20, isQuotation: false, bold: "Where did", rest: "the devil come from?", answer: "The devil [Satan] was an angel whom God had to punish for trying to make himself greater than God. (Isaiah 14:12-15; Ezekiel 28:11-18)" },
+            { id: 466, points: 20, isQuotation: false, bold: "Why is the devil not", rest: "as powerful as God?", answer: "The devil was created by God and has been defeated by Jesus' death and resurrection. (John 16:11; Colossians 1:16; 2:13-15)" },
+            { id: 467, points: 20, isQuotation: false, bold: "Why can't evil powers", rest: "control a Christian?", answer: "Because the [Holy] Spirit who lives in you is greater than the spirit who lives in the world (1 John 4:4)" },
+            { id: 468, points: 20, isQuotation: false, bold: "What should a Christian's attitude be toward spiritism, astrology,", rest: "and other occult practices?", answer: "Christians should avoid all occult practices because Scripture specifically forbids them. (Deuteronomy 18:10-13; Isaiah 47:12-15)" },
+            { id: 469, points: 20, isQuotation: false, bold: "What happens to a Christian's soul and spirit", rest: "at death?", answer: "The Christian's soul and spirit go immediately to be with the Lord. (2 Corinthians 5:8)" },
+            { id: 470, points: 20, isQuotation: false, bold: "What story of Jesus indicates that both the righteous and the wicked", rest: "are conscious after death?", answer: "The story of Lazarus and the rich man (Luke 16:19-31)" },
+            { id: 471, points: 20, isQuotation: false, bold: "What confession of faith in eternal life and resurrection", rest: "did Job make?", answer: "Job declared that even though he would die and his body decay he would be resurrected and see God. (Job 19:25-26)" },
+            { id: 472, points: 20, isQuotation: false, bold: "Who will", rest: "be resurrected?", answer: "Both the righteous and the wicked-the righteous to receive eternal life and the wicked to receive eternal punishment (John 5:28-29)" },
+            { id: 473, points: 20, isQuotation: false, bold: "Which chapter of the Bible", rest: "is known as the \"resurrection chapter\"?", answer: "1 Corinthians 15" },
+            { id: 474, points: 20, isQuotation: false, bold: "In First Corinthians chapter fifteen, what illustration does Paul use", rest: "to explain the resurrection of Christians?", answer: "The sprouting of a new plant from a seed (1 Corinthians 15:35-44)" },
+            { id: 475, points: 20, isQuotation: false, bold: "There are over how many references in the New Testament", rest: "to the second coming of Christ?", answer: "[Over] three hundred" },
+            { id: 476, points: 20, isQuotation: false, bold: "When will Christians who have died", rest: "be resurrected?", answer: "At the rapture of the Church (1 Thessalonians 4:16-17)" },
+            { id: 477, points: 20, isQuotation: false, bold: "Jesus said that the age or time of His return will be like", rest: "the days of whom?", answer: "Noah and Lot (Luke 17:26-28)" },
+            { id: 478, points: 20, isQuotation: false, bold: "What do we mean when we speak of the", rest: "\"revelation\" of Christ?", answer: "His return to earth to rule and reign for one thousand years following the Great Tribulation (2 Thessalonians 2:5-8; Revelation 20:4-6)" },
+            { id: 479, points: 20, isQuotation: false, bold: "What two great events", rest: "comprise the second coming of Christ?", answer: "The Rapture and Christ's revelation (1 Thessalonians 4:16-17; 2 Thessalonians 2:8)" },
+            { id: 480, points: 20, isQuotation: false, bold: "Which of Jesus' parables tells us that some who claim to be Christians", rest: "will be unprepared for His return?", answer: "The Parable of the Five Wise and Five Foolish Bridesmaids (Matthew 25:1-13)" },
+
+            // --- 30-POINT QUESTIONS (#481 - #576) ---
+            { id: 481, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. According to Romans", rest: "chapter eight, what things cannot separate us from God's love?", answer: "Romans 8:38-39 And I am convinced that nothing can ever separate us from God's love..." },
+            { id: 485, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Is all", rest: "the Bible inspired?", answer: "2 Timothy 3:16 All Scripture is inspired by God and is useful to teach us what is true and to make us realize what is wrong in our lives." },
+            { id: 529, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Do all", rest: "things that happen to a Christian have a purpose?", answer: "Romans 8:28 And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them." },
+            { id: 530, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What should be", rest: "our greatest goal in life?", answer: "Matthew 6:33 \"Seek the Kingdom of God above all else, and live righteously, and he will give you everything you need.\"" },
+            { id: 576, points: 30, isQuotation: false, bold: "From Proverbs chapter six,", rest: "list five things which God hates.", answer: "Proud look, Lying tongue, Hands that kill the innocent, Heart that plots evil, Feet that rush to do wrong, False witness, One who causes trouble. (Proverbs 6:16-19)" }
+        ];
+
+        let currentPool = [];
+        let activeQuestion = null;
+        let score = 0;
+        let stats = { attempted: 0, correct: 0, incorrect: 0, totalBuzzTime: 0, fastestBuzz: 999999 };
+        let timerInterval = null;
+        let wordTimer = null;
+        let questionActive = false;
+        let questionStartTime = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = populateVoices;
+                setTimeout(populateVoices, 250);
+            }
+        });
+
+        function startGame(category) {
+            initAudio();
+            updateSettingsFromUI();
+            initSpeechRecognition();
+
+            const minId = parseInt(document.getElementById('range-min').value) || 1;
+            const maxId = parseInt(document.getElementById('range-max').value) || 576;
+            const quotesOnly = document.getElementById('quotes-only-checkbox').checked;
+
+            currentPool = questionDatabase.filter(q => {
+                const matchesCategory = (category === 'all') || (q.points === category);
+                const matchesRange = (q.id >= minId && q.id <= maxId);
+                const matchesQuotes = (!quotesOnly || q.isQuotation);
+                return matchesCategory && matchesRange && matchesQuotes;
+            });
+
+            if (currentPool.length === 0) {
+                alert("No questions match your selected filter criteria! Please check your ID range or quotation filter.");
+                return;
+            }
+
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('side-pane').style.display = 'block';
+            
+            score = 0;
+            stats = { attempted: 0, correct: 0, incorrect: 0, totalBuzzTime: 0, fastestBuzz: 999999 };
+            updateScoreBoard();
+            updateSidebarPane();
+            loadNextQuestion();
+        }
+
+        function returnToMenu() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (recognition && isListening) recognition.stop();
+            clearInterval(timerInterval);
+            clearInterval(wordTimer);
+            questionActive = false;
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.add('hidden');
+            document.getElementById('side-pane').style.display = 'none';
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+
+        function skipQuestion() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (recognition && isListening) recognition.stop();
+            clearInterval(timerInterval);
+            clearInterval(wordTimer);
+            questionActive = false;
+            loadNextQuestion();
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('score-label').innerText = `⭐ Score: ${score}`;
+        }
+
+        function updateSidebarPane() {
+            document.getElementById('side-answered').innerText = stats.attempted;
+            document.getElementById('side-left').innerText = currentPool.length;
+            document.getElementById('side-marks').innerText = score;
+        }
+
+        function loadNextQuestion() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (recognition && isListening) recognition.stop();
+            clearInterval(timerInterval);
+            clearInterval(wordTimer);
+
+            if (currentPool.length === 0) {
+                document.getElementById('side-pane').style.display = 'none';
+                showSummaryScreen();
+                return;
+            }
+
+            const randomIndex = Math.floor(Math.random() * currentPool.length);
+            activeQuestion = currentPool.splice(randomIndex, 1)[0];
+            questionActive = true;
+
+            document.getElementById('q-type-label').innerText = `🎯 Q#${activeQuestion.id} (${activeQuestion.points}pts)`;
+            document.getElementById('action-area').classList.add('hidden');
+            document.getElementById('answer-box').classList.add('hidden');
+            document.getElementById('buzzer-area').classList.remove('hidden');
+            document.getElementById('transcript-box').classList.add('hidden');
+
+            speakText(activeQuestion.bold);
+
+            const words = activeQuestion.bold.split(" ");
+            let wordIndex = 0;
+            const textContainer = document.getElementById('question-text');
+            textContainer.innerHTML = `<span class="bold-part"></span>`;
+            
+            const boldSpan = textContainer.querySelector('.bold-part');
+            const progressBar = document.getElementById('question-progress');
+            progressBar.style.width = "0%";
+            document.getElementById('timer').innerText = "⚡ READING BOLD LEAD-IN... ⚡";
+
+            questionStartTime = performance.now();
+
+            let wordIntervalMs = readingSpeedSetting === 'slow' ? 650 : (readingSpeedSetting === 'fast' ? 250 : 450);
+
+            wordTimer = setInterval(() => {
+                if (!questionActive) return;
+                if (wordIndex < words.length) {
+                    boldSpan.innerText += (wordIndex === 0 ? "" : " ") + words[wordIndex];
+                    playSound('tick');
+                    wordIndex++;
+                    progressBar.style.width = `${(wordIndex / words.length) * 100}%`;
+                } else {
+                    clearInterval(wordTimer);
+                    progressBar.style.width = "100%";
+                    start10SecondPausePhase();
+                }
+            }, wordIntervalMs); 
+        }
+
+        function start10SecondPausePhase() {
+            if (!questionActive) return;
+            let countdown = 10; 
+
+            document.getElementById('timer').innerText = `⏳ PAUSE BEFORE CONTINUING: ${countdown}s`;
+            
+            timerInterval = setInterval(() => {
+                if (!questionActive) return;
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('timer').innerText = `⏳ PAUSE BEFORE CONTINUING: ${countdown}s`;
+                    playSound('tick');
+                } else {
+                    clearInterval(timerInterval);
+                    renderRestOfQuestion();
+                }
+            }, 1000);
+        }
+
+        function renderRestOfQuestion() {
+            if (!questionActive) return;
+            const textContainer = document.getElementById('question-text');
+            textContainer.innerHTML += ` <span class="rest-part">${activeQuestion.rest}</span>`;
+            
+            speakText(activeQuestion.rest);
+            document.getElementById('timer').innerText = "🔥 BUZZER OPEN FOR UNBOLD QUESTION! 🔥";
+        }
+
+        function playerBuzz() {
+            if (!questionActive) return;
+            
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            const buzzTimeMs = Math.round(performance.now() - questionStartTime);
+
+            questionActive = false; 
+            clearInterval(timerInterval);
+            clearInterval(wordTimer);
+            playSound('buzz');
+            triggerScreenEffect(true);
+
+            stats.totalBuzzTime += buzzTimeMs;
+            if (buzzTimeMs < stats.fastestBuzz) stats.fastestBuzz = buzzTimeMs;
+
+            document.getElementById('buzzer-area').classList.add('hidden');
+            document.getElementById('buzzed-who').innerText = `🚨 Buzzed in! Reaction Time: ${buzzTimeMs} ms. Speak your answer now!`;
+            document.getElementById('action-area').classList.remove('hidden');
+            document.getElementById('transcript-box').classList.remove('hidden');
+            document.getElementById('live-transcript').innerText = "Listening...";
+
+            if (recognition) {
+                try {
+                    isListening = true;
+                    recognition.start();
+                } catch(e) { console.log(e); }
+            }
+
+            let responseTime = difficultySetting === 'beginner' ? 45 : (difficultySetting === 'expert' ? 15 : 30);
+            document.getElementById('timer').innerText = `⏰ Answer Time: ${responseTime}s`;
+            timerInterval = setInterval(() => {
+                responseTime--;
+                document.getElementById('timer').innerText = `⏰ Answer Time: ${responseTime}s`;
+                playSound('tick');
+                if (responseTime <= 0) {
+                    clearInterval(timerInterval);
+                    if (recognition && isListening) recognition.stop();
+                    playSound('incorrect');
+                    triggerScreenEffect(false);
+                    markAnswer(false);
+                }
+            }, 1000);
+        }
+
+        function revealAnswer() {
+            document.getElementById('full-answer-text').innerText = `${activeQuestion.bold} ${activeQuestion.rest} -> ${activeQuestion.answer}`;
+            document.getElementById('answer-box').classList.remove('hidden');
+            speakText(activeQuestion.answer);
+        }
+
+        function markAnswer(isCorrect) {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (recognition && isListening) recognition.stop();
+            clearInterval(timerInterval);
+            clearInterval(wordTimer);
+            questionActive = false;
+            
+            stats.attempted++;
+            if (isCorrect) {
+                score += activeQuestion.points;
+                stats.correct++;
+                playSound('correct');
+                triggerScreenEffect(true);
+            } else {
+                stats.incorrect++;
+                playSound('incorrect');
+                triggerScreenEffect(false);
+                if (difficultySetting === 'expert') score -= activeQuestion.points;
+                else if (difficultySetting === 'standard') score -= Math.floor(activeQuestion.points / 2);
+            }
+            updateScoreBoard();
+            updateSidebarPane();
+            setTimeout(loadNextQuestion, 800);
+        }
+
+        function showSummaryScreen() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('summary-screen').classList.remove('hidden');
+
+            document.getElementById('sum-attempted').innerText = stats.attempted;
+            document.getElementById('sum-correct').innerText = stats.correct;
+            document.getElementById('sum-wrong').innerText = stats.incorrect;
+            document.getElementById('sum-score').innerText = score;
+
+            const avgTime = stats.attempted > 0 ? Math.round(stats.totalBuzzTime / stats.attempted) : 0;
+            const fastTime = stats.fastestBuzz === 999999 ? 0 : stats.fastestBuzz;
+
+            document.getElementById('sum-avg-time').innerText = `${avgTime} ms`;
+            document.getElementById('sum-fast-time').innerText = `${fastTime} ms`;
+        }
 
         window.addEventListener('keydown', (e) => {
-          if (e.code === 'Space') {
-            const activeTag = document.activeElement ? document.activeElement.tagName : '';
-            if (activeTag !== 'INPUT' && activeTag !== 'SELECT') {
-              e.preventDefault();
-              this.playerBuzz();
+            const gameScreenHidden = document.getElementById('game-screen').classList.contains('hidden');
+            const actionAreaHidden = document.getElementById('action-area').classList.contains('hidden');
+
+            if (!gameScreenHidden) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (questionActive) playerBuzz();
+                } else if (e.code === 'Enter') {
+                    e.preventDefault();
+                    if (!questionActive && actionAreaHidden) loadNextQuestion();
+                } else if (e.code === 'KeyS') {
+                    e.preventDefault();
+                    skipQuestion();
+                } else if (e.code === 'KeyP') {
+                    e.preventDefault();
+                    revealAnswer();
+                } else if (e.code === 'KeyC') {
+                    e.preventDefault();
+                    if (!actionAreaHidden) markAnswer(true);
+                } else if (e.code === 'KeyW') {
+                    e.preventDefault();
+                    if (!actionAreaHidden) markAnswer(false);
+                }
             }
-          }
         });
-
-        if (this.ttsEngine) {
-          const loadVoices = () => {
-            this.availableVoices = this.ttsEngine.getVoices();
-            const voiceSelect = document.getElementById('ttsVoiceSelect');
-            if (voiceSelect && this.availableVoices.length) {
-              voiceSelect.innerHTML = this.availableVoices.map((v, i) => 
-                `<option value="${i}">${v.name} (${v.lang})</option>`
-              ).join('');
-            }
-          };
-          loadVoices();
-          if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = loadVoices;
-          }
-        }
-      }
-
-      showScreen(screenId) {
-        ['screenLanding', 'screenHostSetup', 'screenLobby', 'screenArena', 'screenSummary'].forEach(s => {
-          const el = document.getElementById(s);
-          if (el) el.classList.add('hidden');
-        });
-
-        const target = {
-          'landing': 'screenLanding',
-          'host': 'screenHostSetup',
-          'lobby': 'screenLobby',
-          'arena': 'screenArena',
-          'summary': 'screenSummary'
-        }[screenId];
-
-        const targetEl = document.getElementById(target);
-        if (targetEl) targetEl.classList.remove('hidden');
-
-        const headerInfo = document.getElementById('headerMatchInfo');
-        if (headerInfo) {
-          if (screenId === 'arena') {
-            headerInfo.classList.remove('hidden');
-            const codeEl = document.getElementById('headerCode');
-            if (codeEl) codeEl.innerText = this.matchCode || 'SOLO';
-          } else {
-            headerInfo.classList.add('hidden');
-          }
-        }
-      }
-
-      generate7DigitCode() {
-        const n1 = Math.floor(100 + Math.random() * 900);
-        const n2 = Math.floor(1000 + Math.random() * 9000);
-        return `${n1}-${n2}`;
-      }
-
-      showHostSetup() {
-        this.showScreen('host');
-        this.handleCategoryModeChange();
-      }
-
-      handleCategoryModeChange() {
-        const catSelect = document.getElementById('selectCategoryMode');
-        const hint = document.getElementById('rangeHintBadge');
-        const startInput = document.getElementById('inputStartQNum');
-        const endInput = document.getElementById('inputEndQNum');
-
-        if (!catSelect || !hint || !startInput || !endInput) return;
-
-        const cat = catSelect.value;
-        if (cat === '10') {
-          hint.innerText = "Range: #1 - #288";
-          startInput.value = 1;
-          endInput.value = 288;
-        } else if (cat === '20') {
-          hint.innerText = "Range: #289 - #480";
-          startInput.value = 289;
-          endInput.value = 480;
-        } else if (cat === '30') {
-          hint.innerText = "Range: #481 - #576";
-          startInput.value = 481;
-          endInput.value = 576;
-        } else {
-          hint.innerText = "Range: #1 - #576";
-          startInput.value = 1;
-          endInput.value = 576;
-        }
-      }
-
-      toggleBotCount(count) {
-        this.matchConfig.botCount = count;
-        [0, 2, 4].forEach(c => {
-          const btn = document.getElementById(`botBtn${c}`);
-          if (btn) {
-            if (c === count) {
-              btn.className = "bot-select-btn py-2 text-xs font-bold rounded-lg border border-indigo-500/50 bg-indigo-500/10 text-indigo-300";
-            } else {
-              btn.className = "bot-select-btn py-2 text-xs font-bold rounded-lg border border-slate-800 bg-slate-950 text-slate-400";
-            }
-          }
-        });
-      }
-
-      createNewMatch() {
-        this.matchCode = this.generate7DigitCode();
-
-        const hostNameEl = document.getElementById('hostNameInput');
-        const hostName = hostNameEl ? hostNameEl.value.trim() || 'Head Coach' : 'Head Coach';
-        
-        const qCountEl = document.getElementById('inputQuestionCount');
-        const catModeEl = document.getElementById('selectCategoryMode');
-        const startQEl = document.getElementById('inputStartQNum');
-        const endQEl = document.getElementById('inputEndQNum');
-        const playOrderEl = document.getElementById('selectPlayOrder');
-        const pauseBoldEl = document.getElementById('togglePauseBold');
-        const speedEl = document.getElementById('inputSpeedSlider');
-
-        this.matchConfig.qCount = qCountEl ? parseInt(qCountEl.value) || 20 : 20;
-        this.matchConfig.catMode = catModeEl ? catModeEl.value : '10';
-        this.matchConfig.startQ = startQEl ? parseInt(startQEl.value) || 1 : 1;
-        this.matchConfig.endQ = endQEl ? parseInt(endQEl.value) || 288 : 288;
-        this.matchConfig.playOrder = playOrderEl ? playOrderEl.value : 'sequential';
-        this.matchConfig.pauseOnBold = pauseBoldEl ? pauseBoldEl.checked : true;
-        this.matchConfig.speed = speedEl ? parseFloat(speedEl.value) || 1.0 : 1.0;
-
-        this.currentUser = { id: 'host_' + Date.now(), name: hostName };
-        this.players = [{
-          id: this.currentUser.id,
-          name: hostName + ' (Host)',
-          score: 0,
-          correct: 0,
-          errors: 0,
-          status: 'ACTIVE'
-        }];
-
-        for (let i = 1; i <= this.matchConfig.botCount; i++) {
-          this.players.push({
-            id: 'bot_' + i,
-            name: `Bot Quizzer #${i}`,
-            score: 0,
-            correct: 0,
-            errors: 0,
-            status: 'ACTIVE',
-            isBot: true
-          });
-        }
-
-        this.prepareQuestionSet();
-
-        const codeDisplay = document.getElementById('lobbyMatchCodeDisplay');
-        if (codeDisplay) codeDisplay.innerText = this.matchCode;
-
-        this.renderLobbyRoster();
-        this.showScreen('lobby');
-      }
-
-      handleJoinMatch(e) {
-        e.preventDefault();
-        const nameEl = document.getElementById('inputPlayerName');
-        const codeEl = document.getElementById('inputMatchCode');
-        const name = nameEl ? nameEl.value.trim() : 'Quizzer';
-        let code = codeEl ? codeEl.value.trim() : '';
-
-        if (!name) return;
-        if (!code) {
-          code = this.generate7DigitCode();
-        }
-
-        this.matchCode = code;
-        this.currentUser = { id: 'p_' + Date.now(), name: name };
-        
-        if (!this.players.some(p => p.id === this.currentUser.id)) {
-          this.players.push({ id: this.currentUser.id, name: name, score: 0, correct: 0, errors: 0, status: 'ACTIVE' });
-        }
-
-        const codeDisplay = document.getElementById('lobbyMatchCodeDisplay');
-        if (codeDisplay) codeDisplay.innerText = this.matchCode;
-
-        this.renderLobbyRoster();
-        this.showScreen('lobby');
-      }
-
-      renderLobbyRoster() {
-        const rosterList = document.getElementById('lobbyPlayerList');
-        const countBadge = document.getElementById('lobbyPlayerCount');
-        if (!rosterList) return;
-
-        if (countBadge) countBadge.innerText = this.players.length;
-
-        rosterList.innerHTML = this.players.map((p, idx) => `
-          <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-xs">
-            <span class="font-bold text-white flex items-center">
-              <span class="w-5 text-slate-500">#${idx + 1}</span> ${p.name}
-            </span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              ${p.isBot ? 'Bot Player' : (p.id === this.currentUser?.id ? 'You' : 'Participant')}
-            </span>
-          </div>
-        `).join('');
-      }
-
-      startQuizFromLobby() {
-        this.renderScoreboard();
-        this.showScreen('arena');
-        const codeElHeader = document.getElementById('headerCode');
-        if (codeElHeader) codeElHeader.innerText = this.matchCode;
-        const adminCodeEl = document.getElementById('adminMatchCode');
-        if (adminCodeEl) adminCodeEl.innerText = this.matchCode;
-
-        this.nextQuestion();
-      }
-
-      prepareQuestionSet() {
-        let pool = [...JBQ_QUESTION_DATABASE];
-        const startQ = Math.max(1, this.matchConfig.startQ || 1);
-        const endQ = Math.min(576, this.matchConfig.endQ || 288);
-        const count = this.matchConfig.qCount || 20;
-        const playOrder = this.matchConfig.playOrder || 'sequential';
-
-        pool = pool.filter(q => q.id >= startQ && q.id <= endQ);
-        if (pool.length === 0) {
-          pool = JBQ_QUESTION_DATABASE.filter(q => q.id >= 1 && q.id <= 288);
-        }
-
-        if (playOrder === 'sequential') {
-          pool.sort((a, b) => a.id - b.id);
-        } else {
-          pool.sort(() => Math.random() - 0.5);
-        }
-
-        this.activeQuestions = pool.slice(0, count);
-        this.currentQIndex = -1;
-      }
-
-      nextQuestion() {
-        this.stopTTS();
-        const lockoutEl = document.getElementById('buzzLockoutBanner');
-        const pauseEl = document.getElementById('pauseOverlay');
-        if (lockoutEl) lockoutEl.classList.add('hidden');
-        if (pauseEl) pauseEl.classList.add('hidden');
-
-        this.currentQIndex++;
-        if (this.currentQIndex >= this.activeQuestions.length) {
-          this.finishMatch();
-          return;
-        }
-
-        this.activeQ = this.activeQuestions[this.currentQIndex];
-        this.state = 'READING';
-        this.buzzLock = null;
-
-        const qProgEl = document.getElementById('headerQProgress');
-        const badgeQNumEl = document.getElementById('badgeQNumber');
-        const badgeQPtsEl = document.getElementById('badgeQPoints');
-        const badgeQIDEl = document.getElementById('badgeQID');
-        const headerPtsBadgeEl = document.getElementById('headerPointsBadge');
-        const quoteTagEl = document.getElementById('quotationTag');
-        const qDisplayEl = document.getElementById('questionDisplay');
-        const ansDisplayEl = document.getElementById('answerDisplay');
-        const judgePlusEl = document.getElementById('judgePlusPts');
-        const judgeMinusEl = document.getElementById('judgeMinusPts');
-
-        if (qProgEl) qProgEl.innerText = `Q ${this.currentQIndex + 1}/${this.activeQuestions.length}`;
-        if (badgeQNumEl) badgeQNumEl.innerText = `Question ${this.currentQIndex + 1} of ${this.activeQuestions.length}`;
-        if (badgeQPtsEl) badgeQPtsEl.innerText = `${this.activeQ.points} Points`;
-        if (badgeQIDEl) badgeQIDEl.innerText = `#${this.activeQ.id}`;
-        if (headerPtsBadgeEl) headerPtsBadgeEl.innerText = `${this.activeQ.points} Pts`;
-
-        if (quoteTagEl) {
-          if (this.activeQ.isQuotation) quoteTagEl.classList.remove('hidden');
-          else quoteTagEl.classList.add('hidden');
-        }
-
-        if (qDisplayEl) qDisplayEl.innerHTML = this.activeQ.question;
-        if (ansDisplayEl) ansDisplayEl.innerText = "Hidden until answered";
-        if (judgePlusEl) judgePlusEl.innerText = this.activeQ.points;
-        if (judgeMinusEl) judgeMinusEl.innerText = Math.round(this.activeQ.points / 2);
-
-        this.speakQuestion();
-      }
-
-      speakQuestion() {
-        if (!this.ttsEngine || !this.activeQ) return;
-
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = this.activeQ.question;
-        const fullText = tempDiv.innerText;
-
-        const boldMatch = this.activeQ.question.match(/<b>(.*?)<\/b>/);
-        let firstChunk = fullText;
-        let secondChunk = "";
-
-        if (boldMatch && this.matchConfig.pauseOnBold) {
-          const boldText = boldMatch[1];
-          const splitIdx = fullText.indexOf(boldText) + boldText.length;
-          firstChunk = fullText.substring(0, splitIdx);
-          secondChunk = fullText.substring(splitIdx);
-        }
-
-        this.currentUtterance = new SpeechSynthesisUtterance(firstChunk);
-        this.currentUtterance.rate = this.matchConfig.speed;
-
-        const voiceIdx = document.getElementById('ttsVoiceSelect')?.value;
-        if (voiceIdx && this.availableVoices[voiceIdx]) {
-          this.currentUtterance.voice = this.availableVoices[voiceIdx];
-        }
-
-        const audioStatus = document.getElementById('audioStatusBar');
-        const audioStateText = document.getElementById('audioStateText');
-        if (audioStatus) audioStatus.classList.remove('opacity-0');
-        if (audioStateText) audioStateText.innerText = "Reading Question...";
-
-        this.currentUtterance.onend = () => {
-          if (secondChunk && this.state === 'READING') {
-            this.state = 'PAUSED_BOLD';
-            const pauseOverlay = document.getElementById('pauseOverlay');
-            if (pauseOverlay) pauseOverlay.classList.remove('hidden');
-            if (audioStateText) audioStateText.innerText = "Paused after bold core...";
-
-            this.triggerBotBuzzCheck();
-
-            this.pauseTimer = setTimeout(() => {
-              if (this.state === 'PAUSED_BOLD') {
-                if (pauseOverlay) pauseOverlay.classList.add('hidden');
-                this.state = 'READING';
-                this.speakSecondChunk(secondChunk);
-              }
-            }, 3500);
-          } else {
-            this.state = 'IDLE';
-            if (audioStateText) audioStateText.innerText = "Finished Reading";
-          }
-        };
-
-        this.ttsEngine.speak(this.currentUtterance);
-      }
-
-      speakSecondChunk(text) {
-        if (!text.trim()) return;
-        this.currentUtterance = new SpeechSynthesisUtterance(text);
-        this.currentUtterance.rate = this.matchConfig.speed;
-        const audioStateText = document.getElementById('audioStateText');
-        if (audioStateText) audioStateText.innerText = "Reading Remaining Question...";
-        this.ttsEngine.speak(this.currentUtterance);
-      }
-
-      skipPause() {
-        if (this.pauseTimer) clearTimeout(this.pauseTimer);
-        const pauseOverlay = document.getElementById('pauseOverlay');
-        if (pauseOverlay) pauseOverlay.classList.add('hidden');
-        if (this.state === 'PAUSED_BOLD') {
-          this.state = 'READING';
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = this.activeQ.question;
-          const fullText = tempDiv.innerText;
-          const boldMatch = this.activeQ.question.match(/<b>(.*?)<\/b>/);
-          if (boldMatch) {
-            const boldText = boldMatch[1];
-            const splitIdx = fullText.indexOf(boldText) + boldText.length;
-            this.speakSecondChunk(fullText.substring(splitIdx));
-          }
-        }
-      }
-
-      stopTTS() {
-        if (this.ttsEngine) {
-          this.ttsEngine.cancel();
-        }
-      }
-
-      toggleTTSPause() {
-        if (!this.ttsEngine) return;
-        const audioStateText = document.getElementById('audioStateText');
-        if (this.ttsEngine.speaking && !this.ttsEngine.paused) {
-          this.ttsEngine.pause();
-          if (audioStateText) audioStateText.innerText = "Audio Paused";
-        } else if (this.ttsEngine.paused) {
-          this.ttsEngine.resume();
-          if (audioStateText) audioStateText.innerText = "Reading...";
-        }
-      }
-
-      repeatQuestion() {
-        this.stopTTS();
-        this.speakQuestion();
-      }
-
-      playerBuzz(pId = null) {
-        if (this.state !== 'READING' && this.state !== 'PAUSED_BOLD') return;
-
-        const buzzingPlayer = pId 
-          ? this.players.find(p => p.id === pId)
-          : this.players.find(p => p.id === this.currentUser.id);
-
-        if (!buzzingPlayer || buzzingPlayer.status !== 'ACTIVE') return;
-
-        this.stopTTS();
-        this.state = 'BUZZED';
-        this.buzzLock = {
-          playerId: buzzingPlayer.id,
-          playerName: buzzingPlayer.name,
-          time: Date.now()
-        };
-
-        const buzzName = document.getElementById('buzzPlayerName');
-        const buzzDetail = document.getElementById('buzzTimeDetail');
-        const lockoutBanner = document.getElementById('buzzLockoutBanner');
-
-        if (buzzName) buzzName.innerText = buzzingPlayer.name;
-        if (buzzDetail) buzzDetail.innerText = `Buzzed during Q${this.currentQIndex + 1} (#${this.activeQ.id})`;
-        if (lockoutBanner) lockoutBanner.classList.remove('hidden');
-
-        this.playBuzzSound();
-
-        if (buzzingPlayer.isBot) {
-          setTimeout(() => {
-            const botCorrect = Math.random() < 0.82;
-            this.judgeAnswer(botCorrect);
-          }, 2000);
-        }
-      }
-
-      triggerBotBuzzCheck() {
-        const activeBots = this.players.filter(p => p.isBot && p.status === 'ACTIVE');
-        if (!activeBots.length) return;
-
-        activeBots.forEach(bot => {
-          if (Math.random() < 0.45) {
-            const delay = Math.floor(600 + Math.random() * 1800);
-            setTimeout(() => {
-              if (this.state === 'PAUSED_BOLD' || this.state === 'READING') {
-                this.playerBuzz(bot.id);
-              }
-            }, delay);
-          }
-        });
-      }
-
-      playBuzzSound() {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.3);
-          gain.gain.setValueAtTime(0.3, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.3);
-        } catch(e) {}
-      }
-
-      judgeAnswer(isCorrect) {
-        if (!this.buzzLock || !this.activeQ) return;
-
-        const player = this.players.find(p => p.id === this.buzzLock.playerId);
-        if (!player) return;
-
-        const penalty = Math.round(this.activeQ.points / 2);
-
-        if (isCorrect) {
-          player.score += this.activeQ.points;
-          player.correct += 1;
-
-          if (player.correct >= 6 && player.status === 'ACTIVE') {
-            player.score += 10;
-            player.status = 'QUIZ_OUT';
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-          }
-        } else {
-          player.score -= penalty;
-          player.errors += 1;
-
-          if (player.errors >= 3) {
-            player.status = 'FOUL_OUT';
-          }
-        }
-
-        const ansDisplay = document.getElementById('answerDisplay');
-        const lockoutBanner = document.getElementById('buzzLockoutBanner');
-        if (ansDisplay) ansDisplay.innerText = this.activeQ.answer;
-        if (lockoutBanner) lockoutBanner.classList.add('hidden');
-        this.state = 'JUDGED';
-
-        this.renderScoreboard();
-      }
-
-      renderScoreboard() {
-        const list = document.getElementById('scoreboardList');
-        const adminList = document.getElementById('adminPlayerAdjustList');
-        const countBadge = document.getElementById('playerCountBadge');
-        if (!list) return;
-
-        const sorted = [...this.players].sort((a, b) => b.score - a.score);
-        if (countBadge) countBadge.innerText = `${this.players.length} Players`;
-
-        list.innerHTML = sorted.map((p, idx) => {
-          let statusBadge = "";
-          if (p.status === 'QUIZ_OUT') {
-            statusBadge = `<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Quiz-Out (+10)</span>`;
-          } else if (p.status === 'FOUL_OUT') {
-            statusBadge = `<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">Foul-Out</span>`;
-          }
-
-          return `
-            <div class="flex items-center justify-between p-2.5 rounded-xl ${p.id === this.currentUser.id ? 'bg-indigo-600/15 border border-indigo-500/30' : 'bg-slate-950/60 border border-slate-800'}">
-              <div class="flex items-center space-x-2.5">
-                <span class="w-5 text-center text-xs font-bold text-slate-500">#${idx + 1}</span>
-                <div>
-                  <div class="text-xs font-bold text-white flex items-center space-x-1.5">
-                    <span>${p.name}</span>
-                    ${statusBadge}
-                  </div>
-                  <div class="text-[10px] text-slate-400 space-x-2">
-                    <span class="text-emerald-400">✓ ${p.correct}</span>
-                    <span class="text-red-400">✗ ${p.errors}</span>
-                  </div>
+    </script>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="container" id="app">
+        <h1>🎮 JBQ Arcade Arena 🏆</h1>
+        <p class="subtitle">✨ Official Bible Fact-Pak Trainer & Voice Buzzer ✨</p>
+
+        <!-- MENU SCREEN -->
+        <div id="menu-screen">
+            <h3 style="color: var(--accent-gold); font-size: 1.5rem;">Configure Your Game ⚙️</h3>
+            
+            <div class="settings-box">
+                <div class="settings-row">
+                    <span>🐢 Reading Speed:</span>
+                    <select id="reading-speed-select" onchange="updateSettingsFromUI()">
+                        <option value="slow">Slow (Younger Children)</option>
+                        <option value="normal" selected>Normal (Standard)</option>
+                        <option value="fast">Fast (Advanced Quizzers)</option>
+                    </select>
                 </div>
-              </div>
-              <span class="text-sm font-black text-amber-400 font-mono">${p.score} pts</span>
+                <div class="settings-row">
+                    <span>🗣️ Reading Voice:</span>
+                    <select id="voice-select">
+                        <option value="">Default Browser Voice</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <span>🛡️ Difficulty Level:</span>
+                    <select id="difficulty-select" onchange="updateSettingsFromUI()">
+                        <option value="beginner">Beginner (No Penalty)</option>
+                        <option value="standard" selected>Standard (Half Penalty)</option>
+                        <option value="expert">Expert (Full Penalty & Shorter Timer)</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <span>📌 Preset Tier Range:</span>
+                    <select id="preset-range-select" onchange="applyPresetRange(this.value)">
+                        <option value="custom">Custom Range</option>
+                        <option value="1-288">10-Point Questions (1 - 288)</option>
+                        <option value="289-480">20-Point Questions (289 - 480)</option>
+                        <option value="481-576">30-Point Questions (481 - 576)</option>
+                        <option value="1-576" selected>All Questions (1 - 576)</option>
+                    </select>
+                </div>
+                <div class="settings-row">
+                    <span>🔢 Question ID Range:</span>
+                    <div>
+                        <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576" oninput="document.getElementById('preset-range-select').value='custom'"> to 
+                        <input type="number" id="range-max" value="576" placeholder="Max" min="1" max="576" oninput="document.getElementById('preset-range-select').value='custom'">
+                    </div>
+                </div>
+                <div class="settings-row" style="margin-bottom:0;">
+                    <span>📜 Quotation Questions Only:</span>
+                    <input type="checkbox" id="quotes-only-checkbox">
+                </div>
             </div>
-          `;
-        }).join('');
 
-        if (adminList) {
-          adminList.innerHTML = this.players.map(p => `
-            <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs">
-              <span class="font-semibold text-slate-200">${p.name}</span>
-              <div class="flex items-center space-x-1">
-                <button onclick="window.app.adminAdjustScore('${p.id}', -10)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold">-10</button>
-                <span class="font-mono text-amber-400 font-bold px-1">${p.score}</span>
-                <button onclick="window.app.adminAdjustScore('${p.id}', 10)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold">+10</button>
-              </div>
+            <h3 style="color: var(--accent-gold); font-size: 1.5rem; margin-top: 20px;">Pick Your Mission! 🚀</h3>
+            <div class="menu-grid">
+                <button onclick="startGame(10)">⭐ 10-Point Quest<br><span style="font-size:0.9rem; font-weight:normal;">(Range 1-288)</span></button>
+                <button onclick="startGame(20)">⭐⭐ 20-Point Challenge<br><span style="font-size:0.9rem; font-weight:normal;">(Range 289-480)</span></button>
+                <button onclick="startGame(30)">⭐⭐⭐ 30-Point Boss Level<br><span style="font-size:0.9rem; font-weight:normal;">(Range 481-576)</span></button>
+                <button onclick="startGame('all')">🏆 Ultimate Random Mix!<br><span style="font-size:0.9rem; font-weight:normal;">(All Questions)</span></button>
             </div>
-          `).join('');
-        }
-      }
-
-      adminAdjustScore(pId, delta) {
-        const p = this.players.find(x => x.id === pId);
-        if (p) {
-          p.score += delta;
-          this.renderScoreboard();
-        }
-      }
-
-      toggleAdminDrawer() {
-        const drawer = document.getElementById('adminDrawer');
-        if (drawer) {
-          drawer.classList.toggle('hidden');
-          const codeEl = document.getElementById('adminMatchCode');
-          if (codeEl) codeEl.innerText = this.matchCode || 'SOLO';
-        }
-      }
-
-      copyMatchCode() {
-        if (!this.matchCode) return;
-        navigator.clipboard.writeText(this.matchCode);
-        alert(`Match Code ${this.matchCode} copied to clipboard!`);
-      }
-
-      finishMatch() {
-        this.stopTTS();
-        const sorted = [...this.players].sort((a, b) => b.score - a.score);
-        const winner = sorted[0];
-
-        const winnerName = document.getElementById('winnerName');
-        const winnerScore = document.getElementById('winnerScore');
-        if (winnerName) winnerName.innerText = winner ? winner.name : "N/A";
-        if (winnerScore) winnerScore.innerText = winner ? `${winner.score} Total Points` : "0 Points";
-
-        const summaryList = document.getElementById('summaryList');
-        if (summaryList) {
-          summaryList.innerHTML = sorted.map((p, i) => `
-            <div class="flex items-center justify-between py-2 border-b border-slate-800/80 last:border-none text-xs">
-              <span class="font-bold text-slate-200">${i + 1}. ${p.name}</span>
-              <span class="font-mono font-black text-amber-400">${p.score} pts (${p.correct} correct, ${p.errors} errors)</span>
+            <div class="audio-toggle-group">
+                <span id="sound-status" onclick="toggleSound()">Sound: ON 🔊</span>
+                <span id="speech-status" onclick="toggleSpeech()">Speech: ON 🗣️</span>
             </div>
-          `).join('');
-        }
+        </div>
 
-        this.showScreen('summary');
-        confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
-      }
+        <!-- GAMEPLAY SCREEN -->
+        <div id="game-screen" class="hidden">
+            <div class="score-board">
+                <span id="score-label">⭐ Score: 0</span>
+                <span id="q-type-label" style="color: var(--accent-gold);">🎯 Points: 10</span>
+            </div>
 
-      endMatchEarly() {
-        this.toggleAdminDrawer();
-        this.finishMatch();
-      }
+            <div class="timer-display" id="timer">Get Ready... 🚀</div>
 
-      restartMatch() {
-        this.prepareQuestionSet();
-        this.players.forEach(p => {
-          p.score = 0;
-          p.correct = 0;
-          p.errors = 0;
-          p.status = 'ACTIVE';
-        });
-        this.renderScoreboard();
-        this.showScreen('arena');
-        this.nextQuestion();
-      }
-    }
+            <div class="progress-container">
+                <div class="progress-bar" id="question-progress"></div>
+            </div>
 
-    // Initialize application immediately upon script load
-    window.app = new JBQApp();
-  </script>
+            <div class="card">
+                <p id="question-text" style="margin: 0; color: #fef08a;">Loading question...</p>
+            </div>
+
+            <div id="buzzer-area" class="buzzer-section hidden">
+                <button class="buzzer-btn" onclick="playerBuzz()">🔔 BUZZ IN & SPEAK! 🔔</button>
+                <span class="keyboard-hint">⌨️ Press [SPACEBAR] to Buzz In!</span>
+            </div>
+
+            <div id="action-area" class="hidden">
+                <p id="buzzed-who" style="font-weight: bold; color: var(--accent-gold); font-size: 1.2rem;"></p>
+                <div class="transcript-box" id="transcript-box">
+                    🎙️ <strong>Voice Recognition:</strong> <span id="live-transcript">Listening...</span>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+                    <button onclick="revealAnswer()">💡 Peek [P]</button>
+                    <button class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
+                    <button class="danger" onclick="markAnswer(false)">❌ Wrong [W]</button>
+                </div>
+            </div>
+
+            <div id="answer-box" class="hidden" style="margin-top: 20px; background: rgba(245, 158, 11, 0.2); border: 2px dashed var(--accent-gold); padding: 15px; border-radius: 15px; text-align: left;">
+                <strong style="color: var(--accent-gold); font-size: 1.2rem;">📖 Correct Answer:</strong> <p id="full-answer-text" style="margin: 5px 0 0 0; font-size: 1.1rem;"></p>
+            </div>
+
+            <div class="control-panel">
+                <button class="warning" onclick="skipQuestion()">⏭️ Skip [S]</button>
+                <button onclick="loadNextQuestion()">➡️ Next [Enter]</button>
+                <button class="secondary" onclick="returnToMenu()">🏠 Quit to Home</button>
+            </div>
+        </div>
+
+        <!-- SUMMARY SCREEN -->
+        <div id="summary-screen" class="hidden">
+            <h2>🎉 Mission Complete! Awesome Job! 🌟</h2>
+            <div class="summary-card">
+                <p style="font-size: 1.3rem; margin: 12px 0;">🎯 <strong>Total Questions Tried:</strong> <span id="sum-attempted" style="color: var(--accent-blue);">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">🎉 <strong>Correct Answers:</strong> <span id="sum-correct" style="color: #10b981;">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">💡 <strong>Incorrect Answers:</strong> <span id="sum-wrong" style="color: #ef4444;">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">⚡ <strong>Fastest Reaction:</strong> <span id="sum-fast-time" style="color: #38bdf8;">0 ms</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">⏱️ <strong>Average Reaction:</strong> <span id="sum-avg-time" style="color: #fde047;">0 ms</span></p>
+                <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
+                <p style="font-size: 1.6rem; margin: 10px 0; color: var(--accent-gold);">🏆 <strong>Total Stars Scored:</strong> <span id="sum-score">0</span> Points!</p>
+            </div>
+            <div style="margin-top: 25px;">
+                <button onclick="returnToMenu()">🏠 Play Again!</button>
+            </div>
+        </div>
+
+        <div class="footer-copyright">
+            © 2026 lironvictor. All rights reserved.
+        </div>
+    </div>
+
+    <!-- RIGHT HAND SIDE PANE -->
+    <div class="sidebar-pane" id="side-pane">
+        <h3>📊 Game Tracker</h3>
+        <div class="sidebar-stat">
+            Answered: <span id="side-answered">0</span>
+        </div>
+        <div class="sidebar-stat">
+            Left: <span id="side-left">0</span>
+        </div>
+        <div class="sidebar-stat">
+            Marks: <span id="side-marks">0</span>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
