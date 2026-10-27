@@ -11,8 +11,6 @@
             --accent-gold: #ffb703;
             --accent-blue: #38bdf8;
             --text-light: #ffffff;
-            --success: #10b981;
-            --danger: #ef4444;
         }
 
         body { 
@@ -29,8 +27,13 @@
             transition: background-color 0.3s ease;
         }
 
-        .flash-green { animation: flashGreen 0.3s ease; }
-        .flash-red { animation: flashRed 0.3s ease; }
+        /* Screen Flash & Shake Effects */
+        .flash-green {
+            animation: flashGreen 0.3s ease;
+        }
+        .flash-red {
+            animation: flashRed 0.3s ease;
+        }
         @keyframes flashGreen {
             0% { background-color: rgba(16, 185, 129, 0.5); }
             100% { background-color: transparent; }
@@ -103,7 +106,9 @@
             font-weight: bold;
         }
 
-        .sidebar-stat span { color: var(--accent-blue); }
+        .sidebar-stat span {
+            color: var(--accent-blue);
+        }
 
         h1 { 
             color: var(--accent-gold); 
@@ -148,11 +153,17 @@
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
-            max-width: 220px;
         }
 
-        .settings-row input[type="number"] { width: 65px; text-align: center; }
-        .settings-row input[type="checkbox"] { transform: scale(1.3); cursor: pointer; }
+        .settings-row input[type="number"] {
+            width: 75px;
+            text-align: center;
+        }
+
+        .settings-row input[type="checkbox"] {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
 
         button { 
             background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
@@ -184,17 +195,6 @@
             font-size: 1.4rem; 
             line-height: 1.6; 
             box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
-        }
-
-        .bold-part {
-            font-weight: 900;
-            color: var(--accent-gold);
-            text-decoration: underline;
-        }
-
-        .rest-part {
-            font-weight: normal;
-            color: #ffffff;
         }
 
         .progress-container {
@@ -237,7 +237,12 @@
             animation: pulse 1.5s infinite;
         }
 
-        .keyboard-hint { margin-top: 10px; font-size: 0.95rem; color: #38bdf8; font-weight: bold; }
+        .keyboard-hint {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #38bdf8;
+            font-weight: bold;
+        }
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -271,17 +276,12 @@
             flex-wrap: wrap;
         }
 
-        .control-panel { display: flex; gap: 12px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
-
-        .transcript-box {
-            background: rgba(15, 23, 42, 0.9);
-            border: 2px dashed var(--accent-blue);
-            padding: 12px;
-            border-radius: 12px;
-            margin-top: 15px;
-            font-size: 1.1rem;
-            color: #38bdf8;
-            font-style: italic;
+        .control-panel {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
         }
 
         .summary-card {
@@ -294,7 +294,12 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
-        .footer-copyright { margin-top: 25px; font-size: 0.85rem; color: #94a3b8; letter-spacing: 1px; }
+        .footer-copyright {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
 
         @media(max-width: 900px) {
             .main-layout { flex-direction: column; align-items: center; }
@@ -306,9 +311,7 @@
         let soundEnabled = true;
         let speechEnabled = true;
         let readingSpeedSetting = "normal"; 
-        let difficultySetting = "standard";
-        let recognition = null;
-        let isListening = false;
+        let difficultySetting = "standard";   
 
         function initAudio() {
             if (!audioCtx) {
@@ -340,13 +343,16 @@
                     const gain = audioCtx.createGain();
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
+
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, startTime);
                     gain.gain.setValueAtTime(0.3, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
                     osc.start(startTime);
                     osc.stop(startTime + duration);
                 };
+
                 playChime(1046.50, now, 0.35);       
                 playChime(1318.51, now + 0.12, 0.45); 
             } else if (type === 'correct') {
@@ -377,9 +383,11 @@
             }
         }
 
+        // Trigger Screen Flash & Shake arcade effects
         function triggerScreenEffect(isCorrect) {
             const body = document.body;
             const flashClass = isCorrect ? 'flash-green' : 'flash-red';
+            
             body.classList.add(flashClass, 'screen-shake');
             setTimeout(() => {
                 body.classList.remove(flashClass, 'screen-shake');
@@ -389,38 +397,28 @@
         function toggleSound() {
             soundEnabled = !soundEnabled;
             const statusEl = document.getElementById('sound-status');
-            if (statusEl) statusEl.innerText = soundEnabled ? "Sound: ON 🔊" : "Sound: OFF 🔇";
+            if (statusEl) {
+                statusEl.innerText = soundEnabled ? "Sound: ON 🔊" : "Sound: OFF 🔇";
+            }
         }
 
         function toggleSpeech() {
             speechEnabled = !speechEnabled;
             const speechStatusEl = document.getElementById('speech-status');
-            if (speechStatusEl) speechStatusEl.innerText = speechEnabled ? "Speech: ON 🗣️" : "Speech: OFF 🤫";
-            if (!speechEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+            if (speechStatusEl) {
+                speechStatusEl.innerText = speechEnabled ? "Speech: ON 🗣️" : "Speech: OFF 🤫";
+            }
+            if (!speechEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
         }
 
         function updateSettingsFromUI() {
             const speedSel = document.getElementById('reading-speed-select');
             if (speedSel) readingSpeedSetting = speedSel.value;
+
             const diffSel = document.getElementById('difficulty-select');
             if (diffSel) difficultySetting = diffSel.value;
-        }
-
-        function populateVoices() {
-            if (!('speechSynthesis' in window)) return;
-            const voices = window.speechSynthesis.getVoices();
-            const voiceSelect = document.getElementById('voice-select');
-            if (!voiceSelect) return;
-            
-            const currentVal = voiceSelect.value;
-            voiceSelect.innerHTML = '<option value="">Default Browser Voice</option>';
-            voices.forEach((v, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${v.name} (${v.lang})${v.default ? ' [Default]' : ''}`;
-                voiceSelect.appendChild(option);
-            });
-            voiceSelect.value = currentVal;
         }
 
         function speakText(text) {
@@ -429,272 +427,131 @@
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = readingSpeedSetting === 'slow' ? 0.8 : (readingSpeedSetting === 'fast' ? 1.2 : 0.95);
             utterance.pitch = 1.0;
-
-            const voices = window.speechSynthesis.getVoices();
-            const voiceSelect = document.getElementById('voice-select');
-            if (voiceSelect && voiceSelect.value !== "") {
-                const chosenVoice = voices[parseInt(voiceSelect.value)];
-                if (chosenVoice) utterance.voice = chosenVoice;
-            }
-
             window.speechSynthesis.speak(utterance);
         }
 
-        function applyPresetRange(val) {
-            if (val === 'custom') return;
-            const parts = val.split('-');
-            document.getElementById('range-min').value = parts[0];
-            document.getElementById('range-max').value = parts[1];
-        }
-
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
-
-                recognition.onresult = (event) => {
-                    let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        transcript += event.results[i][0].transcript;
-                    }
-                    document.getElementById('live-transcript').innerText = transcript;
-                    
-                    if (event.results[0].isFinal) {
-                        evaluateSpokenAnswer(transcript);
-                    }
-                };
-
-                recognition.onerror = (event) => {
-                    console.warn("Speech recognition error:", event.error);
-                };
-
-                recognition.onend = () => {
-                    isListening = false;
-                };
-            }
-        }
-
-        function evaluateSpokenAnswer(spokenText) {
-            if (!activeQuestion) return;
-            const cleanSpoken = spokenText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
-            const cleanExpected = activeQuestion.answer.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").trim();
-
-            const expectedWords = cleanExpected.split(/\s+/);
-            let matchedCount = 0;
-            expectedWords.forEach(w => {
-                if (cleanSpoken.includes(w)) matchedCount++;
-            });
-
-            const matchRatio = expectedWords.length > 0 ? (matchedCount / expectedWords.length) : 0;
-            
-            document.getElementById('buzzed-who').innerText = `🎙️ Heard: "${spokenText}" (Match: ${Math.round(matchRatio * 100)}%)`;
-
-            if (matchRatio >= 0.5) {
-                markAnswer(true);
-            } else {
-                markAnswer(false);
-            }
-        }
-
-        // Full Comprehensive Question Database covering 10, 20, and 30 pointers (IDs 1 through 576)
+        // Comprehensive Bible Fact-Pak Question Database Sample covering 10, 20, and 30 pointers across ranges
         const questionDatabase = [
-            // --- 10-POINT QUESTIONS (#1 - #288) ---
-            { id: 1, points: 10, isQuotation: false, bold: "What is", rest: "the Bible?", answer: "The Bible is the inspired Word of God and is His revelation to all people of himself and His plan of salvation." },
-            { id: 2, points: 10, isQuotation: false, bold: "How many", rest: "books are there in the Bible?", answer: "Sixty-six" },
-            { id: 3, points: 10, isQuotation: false, bold: "What are", rest: "the two divisions of the Bible?", answer: "Old Testament and New Testament" },
-            { id: 4, points: 10, isQuotation: false, bold: "What does", rest: "\"testament\" mean?", answer: "Covenant [contract or agreement]" },
-            { id: 5, points: 10, isQuotation: false, bold: "How many", rest: "books are in the Old Testament?", answer: "Thirty-nine" },
-            { id: 24, points: 10, isQuotation: true, bold: "QUOTATION QUESTION. Where did", rest: "the universe come from?", answer: "Genesis 1:1 In the beginning God created the heavens and the earth." },
+            // --- 10-POINT QUESTIONS ---
+            { id: 1, points: 10, isQuotation: false, bold: "What is the Bible?", rest: "The Bible is the inspired Word of God and is His revelation to all people of Himself and His plan of salvation.", full: "What is the Bible? The Bible is the inspired Word of God and is His revelation to all people of Himself and His plan of salvation." },
+            { id: 2, points: 10, isQuotation: false, bold: "How many books are there in the Bible?", rest: "Sixty-six", full: "How many books are there in the Bible? Sixty-six" },
+            { id: 24, points: 10, isQuotation: true, bold: "QUOTATION QUESTION. Where did the universe come from?", rest: "Genesis 1:1 In the beginning God created the heavens and the earth.", full: "QUOTATION QUESTION. Where did the universe come from? Genesis 1:1 In the beginning God created the heavens and the earth." },
+            { id: 145, points: 10, isQuotation: false, bold: "Why did Jeroboam establish idol worship in the northern kingdom of Israel?", rest: "So the people wouldn't go to Jerusalem to offer sacrifices (1 Kings 12:26-30)", full: "Why did Jeroboam establish idol worship in the northern kingdom of Israel? So the people wouldn't go to Jerusalem to offer sacrifices (1 Kings 12:26-30)" },
+            { id: 146, points: 10, isQuotation: false, bold: "On Mount Carmel, why did Elijah ask God to consume the sacrifice with fire?", rest: "So that all of Israel would know that God was really God (1 Kings 18:30-39)", full: "On Mount Carmel, why did Elijah ask God to consume the sacrifice with fire? So that all of Israel would know that God was really God (1 Kings 18:30-39)" },
+            { id: 147, points: 10, isQuotation: false, bold: "Who were the evil king and queen of Israel during the time of Elijah?", rest: "Ahab and Jezebel (1 Kings 21:4-5, 17-26)", full: "Who were the evil king and queen of Israel during the time of Elijah? Ahab and Jezebel (1 Kings 21:4-5, 17-26)" },
+            { id: 148, points: 10, isQuotation: false, bold: "Whom did God take directly to heaven in a whirlwind?", rest: "Elijah (2 Kings 2:11)", full: "Whom did God take directly to heaven in a whirlwind? Elijah (2 Kings 2:11)" },
+            { id: 149, points: 10, isQuotation: false, bold: "What prophet succeeded Elijah?", rest: "Elisha (2 Kings 2:15)", full: "What prophet succeeded Elijah? Elisha (2 Kings 2:15)" },
+            { id: 150, points: 10, isQuotation: false, bold: "What Syrian officer was healed of leprosy by bathing in the Jordan River at Elisha's command?", rest: "Naaman (2 Kings 5:10-14)", full: "What Syrian officer was healed of leprosy by bathing in the Jordan River at Elisha's command? Naaman (2 Kings 5:10-14)" },
+            { id: 151, points: 10, isQuotation: false, bold: "To whom did God give a sign of the sun moving backwards to show him that he was healed?", rest: "Hezekiah (2 Kings 20:8-11)", full: "To whom did God give a sign of the sun moving backwards to show him that he was healed? Hezekiah (2 Kings 20:8-11)" },
+            { id: 152, points: 10, isQuotation: false, bold: "To what city were many of the people of Judah taken as captives?", rest: "Babylon (2 Kings 24:10-16)", full: "To what city were many of the people of Judah taken as captives? Babylon (2 Kings 24:10-16)" },
+            { id: 153, points: 10, isQuotation: false, bold: "What king of Babylon conquered Jerusalem and the Kingdom of Judah?", rest: "Nebuchadnezzar (2 Kings 24:10-16)", full: "What king of Babylon conquered Jerusalem and the Kingdom of Judah? Nebuchadnezzar (2 Kings 24:10-16)" },
+            { id: 154, points: 10, isQuotation: false, bold: "When the people returned to Jerusalem from captivity in Babylon, who oversaw the rebuilding of the temple?", rest: "Zerubbabel (Ezra 3:8)", full: "When the people returned to Jerusalem from captivity in Babylon, who oversaw the rebuilding of the temple? Zerubbabel (Ezra 3:8)" },
+            { id: 155, points: 10, isQuotation: false, bold: "When the people returned to Jerusalem from captivity in Babylon, who oversaw the rebuilding of the walls of the city?", rest: "Nehemiah (Nehemiah 2:4-8)", full: "When the people returned to Jerusalem from captivity in Babylon, who oversaw the rebuilding of the walls of the city? Nehemiah (Nehemiah 2:4-8)" },
+            { id: 156, points: 10, isQuotation: false, bold: "Who was the Jewish girl who became the wife of the king of Persia?", rest: "Esther (Esther 2:16-17)", full: "Who was the Jewish girl who became the wife of the king of Persia? Esther (Esther 2:16-17)" },
+            { id: 157, points: 10, isQuotation: false, bold: "How did Esther save the lives of the Jewish people?", rest: "By asking her husband, king of Persia, to spare their lives (Esther 7:1-6)", full: "How did Esther save the lives of the Jewish people? By asking her husband, king of Persia, to spare their lives (Esther 7:1-6)" },
+            { id: 158, points: 10, isQuotation: false, bold: "What man lost all of his possessions and his health but remained true to God?", rest: "Job (Job 1:7-22)", full: "What man lost all of his possessions and his health but remained true to God? Job (Job 1:7-22)" },
+            { id: 159, points: 10, isQuotation: false, bold: "How did God reward Job for his faithfulness?", rest: "God gave him as many children and twice as many possessions as he had had before his trial. (Job 42:10-13)", full: "How did God reward Job for his faithfulness? God gave him as many children and twice as many possessions as he had had before his trial. (Job 42:10-13)" },
+            { id: 160, points: 10, isQuotation: false, bold: "Who was called the weeping prophet?", rest: "Jeremiah (Jeremiah 9:1)", full: "Who was called the weeping prophet? Jeremiah (Jeremiah 9:1)" },
+            { id: 161, points: 10, isQuotation: false, bold: "Who interpreted a famous dream for King Nebuchadnezzar?", rest: "Daniel (Daniel 2:27-29)", full: "Who interpreted a famous dream for King Nebuchadnezzar? Daniel (Daniel 2:27-29)" },
+            { id: 162, points: 10, isQuotation: false, bold: "Why were Shadrach, Meshach, and Abednego thrown into a blazing furnace?", rest: "They refused to worship the gold statue set up by the king. (Daniel 3:14-23)", full: "Why were Shadrach, Meshach, and Abednego thrown into a blazing furnace? They refused to worship the gold statue set up by the king. (Daniel 3:14-23)" },
+            { id: 163, points: 10, isQuotation: false, bold: "What did Daniel do when the king decreed he could no longer pray to his God?", rest: "He continued to pray just as he always did. (Daniel 6:10)", full: "What did Daniel do when the king decreed he could no longer pray to his God? He continued to pray just as he always did. (Daniel 6:10)" },
+            { id: 164, points: 10, isQuotation: false, bold: "What happened to Daniel when he continued to pray to God instead of to the king?", rest: "He was thrown into the lions' den. (Daniel 6:4-16)", full: "What happened to Daniel when he continued to pray to God instead of to the king? He was thrown into the lions' den. (Daniel 6:4-16)" },
+            { id: 165, points: 10, isQuotation: false, bold: "What was the meaning of the handwriting on the wall at Belshazzar's drunken party?", rest: "That Belshazzar's kingdom was about to be conquered (Daniel 5:25-31)", full: "What was the meaning of the handwriting on the wall at Belshazzar's drunken party? That Belshazzar's kingdom was about to be conquered (Daniel 5:25-31)" },
+            { id: 166, points: 10, isQuotation: false, bold: "Who was swallowed by a great fish when he ran away from doing God's will?", rest: "Jonah (Jonah 1:17)", full: "Who was swallowed by a great fish when he ran away from doing God's will? Jonah (Jonah 1:17)" },
+            { id: 167, points: 10, isQuotation: false, bold: "What happened when Jonah preached to the people of Nineveh?", rest: "The people repented and God forgave them. (Jonah 3:5-10)", full: "What happened when Jonah preached to the people of Nineveh? The people repented and God forgave them. (Jonah 3:5-10)" },
+            { id: 168, points: 10, isQuotation: false, bold: "Where did Micah say the Messiah would be born?", rest: "Bethlehem (Micah 5:2)", full: "Where did Micah say the Messiah would be born? Bethlehem (Micah 5:2)" },
+            { id: 169, points: 10, isQuotation: false, bold: "According to the prophet Zechariah, where will Jesus' feet stand when He returns to the earth?", rest: "The Mount of Olives (Zechariah 14:4)", full: "According to the prophet Zechariah, where will Jesus' feet stand when He returns to the earth? The Mount of Olives (Zechariah 14:4)" },
+            { id: 170, points: 10, isQuotation: false, bold: "Who told Mary she would be the mother of the Messiah?", rest: "The angel Gabriel (Luke 1:26-33)", full: "Who told Mary she would be the mother of the Messiah? The angel Gabriel (Luke 1:26-33)" },
+            { id: 171, points: 10, isQuotation: false, bold: "To whom was the virgin Mary engaged to be married?", rest: "Joseph (Matthew 1:18)", full: "To whom was the virgin Mary engaged to be married? Joseph (Matthew 1:18)" },
+            { id: 172, points: 10, isQuotation: false, bold: "Who were the first persons, other than Joseph and Mary, to hear that Jesus had been born?", rest: "Shepherds (Luke 2:8-16)", full: "Who were the first persons, other than Joseph and Mary, to hear that Jesus had been born? Shepherds (Luke 2:8-16)" },
+            { id: 173, points: 10, isQuotation: false, bold: "What two groups of men worshipped the Christ child?", rest: "Shepherds and Wise Men (Matthew 2:2; Luke 2:8-17)", full: "What two groups of men worshipped the Christ child? Shepherds and Wise Men (Matthew 2:2; Luke 2:8-17)" },
+            { id: 174, points: 10, isQuotation: true, bold: "QUOTATION QUESTION. When the Wise Men came seeking Jesus, what question did they ask?", rest: "Matthew 2:2 \"Where is the newborn king of the Jews?\"", full: "QUOTATION QUESTION. When the Wise Men came seeking Jesus, what question did they ask? Matthew 2:2 \"Where is the newborn king of the Jews?\"" },
+            { id: 175, points: 10, isQuotation: false, bold: "Who was king over Judea when Jesus was born?", rest: "Herod (Matthew 2:3)", full: "Who was king over Judea when Jesus was born? Herod (Matthew 2:3)" },
+            { id: 176, points: 10, isQuotation: false, bold: "How did the Wise Men find Jesus?", rest: "They followed His star to where He was. (Matthew 2:2-9)", full: "How did the Wise Men find Jesus? They followed His star to where He was. (Matthew 2:2-9)" },
+            { id: 177, points: 10, isQuotation: false, bold: "What gifts were given to Jesus by the Wise Men?", rest: "Gold, Frankincense, Myrrh (Matthew 2:11)", full: "What gifts were given to Jesus by the Wise Men? Gold, Frankincense, Myrrh (Matthew 2:11)" },
+            { id: 178, points: 10, isQuotation: false, bold: "Where did Jesus live as He was growing up?", rest: "Nazareth (Matthew 2:23)", full: "Where did Jesus live as He was growing up? Nazareth (Matthew 2:23)" },
+            { id: 179, points: 10, isQuotation: false, bold: "Whom did God send to prepare the way for Jesus?", rest: "John the Baptist (John 3:26-28)", full: "Whom did God send to prepare the way for Jesus? John the Baptist (John 3:26-28)" },
+            { id: 180, points: 10, isQuotation: false, bold: "About how old was Jesus when He began His public ministry?", rest: "[About] thirty years old (Luke 3:23)", full: "About how old was Jesus when He began His public ministry? [About] thirty years old (Luke 3:23)" },
+            { id: 181, points: 10, isQuotation: false, bold: "About how long did Jesus preach and teach before His crucifixion?", rest: "[About] three and a half years", full: "About how long did Jesus preach and teach before His crucifixion? [About] three and a half years" },
+            { id: 182, points: 10, isQuotation: true, bold: "QUOTATION QUESTION. With what words did John the Baptist introduce Jesus?", rest: "John 1:29 \"Look! The Lamb of God who takes away the sin of the world!\"", full: "QUOTATION QUESTION. With what words did John the Baptist introduce Jesus? John 1:29 \"Look! The Lamb of God who takes away the sin of the world!\"" },
+            { id: 183, points: 10, isQuotation: false, bold: "How did John the Baptist describe the way Jesus would baptize?", rest: "With the Holy Spirit and with fire (Matthew 3:11)", full: "How did John the Baptist describe the way Jesus would baptize? With the Holy Spirit and with fire (Matthew 3:11)" },
+            { id: 184, points: 10, isQuotation: false, bold: "Which of the disciples was a tax collector?", rest: "Matthew (Matthew 10:3)", full: "Which of the disciples was a tax collector? Matthew (Matthew 10:3)" },
+            { id: 185, points: 10, isQuotation: false, bold: "After Andrew met Jesus, what did he tell his brother Simon Peter?", rest: "\"We have found the Messiah.\" (John 1:40-41)", full: "After Andrew met Jesus, what did he tell his brother Simon Peter? \"We have found the Messiah.\" (John 1:40-41)" },
+            { id: 186, points: 10, isQuotation: false, bold: "What was Jesus' first miracle?", rest: "Turning water into wine at the wedding in Cana (John 2:1-11)", full: "What was Jesus' first miracle? Turning water into wine at the wedding in Cana (John 2:1-11)" },
+            { id: 187, points: 10, isQuotation: false, bold: "What ruler of the Jews came to Jesus by night seeking the way to eternal life?", rest: "Nicodemus (John 3:1-2)", full: "What ruler of the Jews came to Jesus by night seeking the way to eternal life? Nicodemus (John 3:1-2)" },
+            { id: 188, points: 10, isQuotation: false, bold: "Where did John the Baptist baptize Jesus?", rest: "In the Jordan River (Matthew 3:13)", full: "Where did John the Baptist baptize Jesus? In the Jordan River (Matthew 3:13)" },
+            { id: 189, points: 10, isQuotation: false, bold: "How did God show His approval of Jesus at His baptism?", rest: "The Holy Spirit descended on Him and the Father said, \"This is my dearly loved Son, who brings me great joy.\" (Matthew 3:16-17; Luke 3:21-22)", full: "How did God show His approval of Jesus at His baptism? The Holy Spirit descended on Him and the Father said, \"This is my dearly loved Son, who brings me great joy.\" (Matthew 3:16-17; Luke 3:21-22)" },
+            { id: 190, points: 10, isQuotation: false, bold: "During Jesus' temptation, how long did He go without eating?", rest: "Forty days and nights (Matthew 4:2; Luke 4:2)", full: "During Jesus' temptation, how long did He go without eating? Forty days and nights (Matthew 4:2; Luke 4:2)" },
+            { id: 191, points: 10, isQuotation: false, bold: "Who were the first four apostles Jesus called to follow Him?", rest: "Peter, James, Andrew, John (Matthew 4:18-22)", full: "Who were the first four apostles Jesus called to follow Him? Peter, James, Andrew, John (Matthew 4:18-22)" },
+            { id: 192, points: 10, isQuotation: false, bold: "What do we call the first statements of the Sermon on the Mount which all begin with the words, \"God blesses\"?", rest: "[The] Beatitudes (Matthew 5:2-11)", full: "What do we call the first statements of the Sermon on the Mount which all begin with the words, \"God blesses\"? [The] Beatitudes (Matthew 5:2-11)" },
+            { id: 193, points: 10, isQuotation: false, bold: "How did Jesus prove His power over nature?", rest: "By calming a storm on the Sea of Galilee (Matthew 8:23-27)", full: "How did Jesus prove His power over nature? By calming a storm on the Sea of Galilee (Matthew 8:23-27)" },
+            { id: 194, points: 10, isQuotation: false, bold: "What strange gift did King Herod give to his stepdaughter?", rest: "The head of John the Baptist (Matthew 14:6-11)", full: "What strange gift did King Herod give to his stepdaughter? The head of John the Baptist (Matthew 14:6-11)" },
 
-            // --- 20-POINT QUESTIONS (#289 - #480) ---
-            { id: 289, points: 20, isQuotation: false, bold: "How did God", rest: "give us the Bible?", answer: "The Holy Spirit inspired holy men, giving them both the truth and the words to write. (2 Peter 1:19-21)" },
-            { id: 290, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is infallible?", answer: "The Bible cannot fail and has no errors. (Psalm 119:160)" },
-            { id: 291, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is verbally inspired?", answer: "God inspired each word of the Bible, not just the thoughts or ideas. (2 Timothy 3:16)" },
-            { id: 292, points: 20, isQuotation: false, bold: "What do we mean when we say", rest: "the Bible is our authoritative rule of faith and conduct?", answer: "The Bible has the right to command us in what we believe and what we do. (2 Timothy 3:15-17)" },
-            { id: 293, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How long", rest: "will the Bible last?", answer: "Matthew 24:35 \"Heaven and earth will disappear, but my words will never disappear.\"" },
-            { id: 294, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Why is it", rest: "important to memorize Bible verses?", answer: "Psalm 119:11 I have hidden your word in my heart, that I might not sin against you." },
-            { id: 295, points: 20, isQuotation: false, bold: "Does the Bible", rest: "claim to be inspired?", answer: "Yes. The words, \"and God said,\" or their equivalent, are found over 2,500 times in the Bible." },
-            { id: 296, points: 20, isQuotation: false, bold: "What chapter of the Bible", rest: "is known as the \"love chapter\"?", answer: "1 Corinthians 13" },
-            { id: 297, points: 20, isQuotation: false, bold: "Who wrote", rest: "the first five books of the Bible?", answer: "Moses" },
-            { id: 298, points: 20, isQuotation: false, bold: "Who are", rest: "the four major prophets?", answer: "Isaiah, Jeremiah, Ezekiel, Daniel" },
-            { id: 299, points: 20, isQuotation: false, bold: "Which two apostles", rest: "wrote a Gospel?", answer: "Matthew and John" },
-            { id: 300, points: 20, isQuotation: false, bold: "What is", rest: "a parable?", answer: "A parable is a story about familiar things which helps us understand spiritual truths." },
-            { id: 301, points: 20, isQuotation: false, bold: "What are the four major divisions", rest: "of the Old Testament?", answer: "Law, History, Poetry, Prophets" },
-            { id: 302, points: 20, isQuotation: false, bold: "What wise king", rest: "wrote much of the Book of Proverbs?", answer: "Solomon" },
-            { id: 303, points: 20, isQuotation: false, bold: "What is the main theme", rest: "of the Book of Hebrews?", answer: "That Jesus is a better priest [mediator] between God and people than were the Old Testament priests (Hebrews 7:11-28; 9:14-15)" },
-            { id: 304, points: 20, isQuotation: false, bold: "Which Gospel proves that Jesus is the Messiah", rest: "by showing the fulfillment of many Old Testament prophecies?", answer: "Matthew" },
-            { id: 305, points: 20, isQuotation: false, bold: "Which two Old Testament books", rest: "tell the history of the Jews after their return from captivity in Babylon?", answer: "Ezra and Nehemiah" },
-            { id: 306, points: 20, isQuotation: false, bold: "Who are", rest: "the three Persons of the Trinity?", answer: "God the Father, God the Son, God the Holy Spirit (Matthew 28:19; Acts 10:38; 2 Corinthians 13:14)" },
-            { id: 307, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "eternal?", answer: "God has neither beginning nor ending, but always has been and always will be." },
-            { id: 308, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omnipresent?", answer: "God is everywhere at the same time." },
-            { id: 309, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omnipotent?", answer: "God is all-powerful." },
-            { id: 310, points: 20, isQuotation: false, bold: "What do we mean when we say that God is", rest: "omniscient?", answer: "God is all-wise and all-knowing." },
-            { id: 311, points: 20, isQuotation: false, bold: "What part did God the Father", rest: "have in creation?", answer: "God the Father gave the commands that caused the visible world to be created out of nothing. (Hebrews 11:3)" },
-            { id: 312, points: 20, isQuotation: false, bold: "What does the Bible declare", rest: "is the foundation of wisdom?", answer: "Fear of [respect for] God (Proverbs 9:10)" },
-            { id: 313, points: 20, isQuotation: false, bold: "What kind of worship", rest: "does God desire?", answer: "God desires us to worship in spirit and in truth. (John 4:23-24)" },
-            { id: 314, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Has Jesus", rest: "always been God?", answer: "John 1:1 In the beginning the Word already existed. The Word was with God, and the Word was God." },
-            { id: 315, points: 20, isQuotation: false, bold: "What is Jesus' title", rest: "of divinity?", answer: "Son of God" },
-            { id: 316, points: 20, isQuotation: false, bold: "What is Jesus' title", rest: "of humanity?", answer: "Son of Man" },
-            { id: 317, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse that says Jesus is", rest: "always the same.", answer: "Hebrews 13:8 Jesus Christ is the same yesterday, today, and forever." },
-            { id: 318, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What part did Jesus", rest: "have in creation?", answer: "John 1:3-4 God created everything through him, and nothing was created except through him..." },
-            { id: 319, points: 20, isQuotation: false, bold: "Over how many different Old Testament prophecies", rest: "were fulfilled by the life and death of Jesus?", answer: "[Over] three hundred" },
-            { id: 320, points: 20, isQuotation: false, bold: "What was God's first promise", rest: "of a Savior?", answer: "God told the serpent that one of Eve's descendants would defeat him. (Genesis 3:15)" },
-            { id: 321, points: 20, isQuotation: false, bold: "How was God's first promise", rest: "of a Savior fulfilled?", answer: "Through Jesus' death and resurrection, Satan's power was conquered. (John 12:31; Colossians 2:14-15)" },
-            { id: 322, points: 20, isQuotation: false, bold: "What promise", rest: "did God make to Abraham?", answer: "God promised Abraham that through his descendant all the earth would be blessed. (Genesis 12:3)" },
-            { id: 323, points: 20, isQuotation: false, bold: "Who fulfilled God's promise", rest: "that Abraham's descendant would bless the whole earth?", answer: "[Jesus] Christ (Galatians 3:16)" },
-            { id: 324, points: 20, isQuotation: false, bold: "What is the doctrine", rest: "of Jesus' Incarnation?", answer: "God the Son became human and lived among us. (John 1:1-2, 14)" },
-            { id: 325, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to John's Gospel, why did Jesus", rest: "come to earth?", answer: "John 10:10 \"The thief's purpose is to steal and kill and destroy. My purpose is to give them a rich and satisfying life.\"" },
-            { id: 326, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to Luke's Gospel, why did Jesus", rest: "come to earth?", answer: "Luke 19:10 \"For the Son of Man came to seek and save those who are lost.\"" },
-            { id: 327, points: 20, isQuotation: false, bold: "How did Jesus overcome", rest: "the temptations of Satan?", answer: "By using the Scriptures (Matthew 4:4-10)" },
-            { id: 328, points: 20, isQuotation: false, bold: "What is the importance of the doctrine", rest: "of Jesus' virgin birth?", answer: "Jesus did not have an earthly father. Because of His supernatural birth, Jesus was both fully God and fully human. (Matthew 1:23; John 1:1-14)" },
-            { id: 329, points: 20, isQuotation: false, bold: "Why did God instruct Joseph", rest: "to call Mary's son \"Jesus\"?", answer: "Because He would save His people from their sins (Matthew 1:21)" },
-            { id: 330, points: 20, isQuotation: false, bold: "What is the meaning", rest: "of the name \"Jesus\"?", answer: "The Lord is our Savior. (Matthew 1:21)" },
-            { id: 331, points: 20, isQuotation: false, bold: "What is the meaning", rest: "of the word \"Christ\"?", answer: "The Anointed One of God (Psalm 2:2; Acts 4:26)" },
-            { id: 332, points: 20, isQuotation: false, bold: "How did God", rest: "anoint Jesus?", answer: "With the Holy Spirit and power (Acts 10:38)" },
-            { id: 333, points: 20, isQuotation: false, bold: "What Hebrew word is the same", rest: "as the Greek word \"Christ\"?", answer: "Messiah (John 1:41)" },
-            { id: 334, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How did Jesus say His baptism", rest: "would be different from John's?", answer: "Acts 1:5 \"John baptized with water, but in just a few days you will be baptized with the Holy Spirit.\"" },
-            { id: 335, points: 20, isQuotation: false, bold: "In the Parable of the Good Shepherd, what did Jesus say", rest: "the Good Shepherd would do for the sheep?", answer: "Sacrifice his life (John 10:11)" },
-            { id: 336, points: 20, isQuotation: false, bold: "Why is it absolutely necessary to our salvation", rest: "that Jesus lived a sinless life?", answer: "If Jesus had sinned then His death would have been the penalty of His sin and would not have had power to atone for our sins. (Hebrews 2:16-18; 4:14-15; 1 Peter 1:18-20)" },
-            { id: 337, points: 20, isQuotation: false, bold: "What was proven", rest: "by Jesus' resurrection?", answer: "That Jesus was exactly who He claimed to be-Son of God, Savior, and Lord (Romans 1:4)" },
-            { id: 338, points: 20, isQuotation: false, bold: "How important is the doctrine", rest: "of resurrection to our Christian faith?", answer: "If Christ was not raised from the dead, our faith is useless. (1 Corinthians 15:16-17)" },
-            { id: 339, points: 20, isQuotation: false, bold: "More than how many people", rest: "saw Jesus after He was raised from the dead?", answer: "[More than] five hundred (1 Corinthians 15:6)" },
-            { id: 340, points: 20, isQuotation: false, bold: "How long did Jesus walk and talk", rest: "with His apostles after His death?", answer: "Forty days (Acts 1:1-3)" },
-            { id: 341, points: 20, isQuotation: false, bold: "Where is Jesus now", rest: "and what is He doing?", answer: "Jesus is at the right hand of the Father interceding [pleading] for believers. (Romans 8:34; Hebrews 7:25; 1 John 2:1)" },
-            { id: 342, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What is Jesus great \"I am\" saying", rest: "in the Book of Revelation?", answer: "Revelation 22:13 \"I am the Alpha and the Omega, the First and the Last, the Beginning and the End.\"" },
-            { id: 343, points: 20, isQuotation: false, bold: "How did God", rest: "create man?", answer: "He formed man from the dust of the ground and breathed the breath of life into him. (Genesis 2:7)" },
-            { id: 344, points: 20, isQuotation: false, bold: "How did God", rest: "create woman?", answer: "God made woman out of one of the ribs of Adam. (Genesis 2:21-22)" },
-            { id: 345, points: 20, isQuotation: false, bold: "How were people created", rest: "in the image of God?", answer: "People were created with spiritual natures which permit them to reason, make choices, and to know and love God. (Genesis 1:27...)" },
-            { id: 346, points: 20, isQuotation: false, bold: "When Adam and Eve sinned, how did God provide", rest: "them clothing?", answer: "He made them clothing from the skins of animals. (Genesis 3:21)" },
-            { id: 347, points: 20, isQuotation: false, bold: "What is meant by", rest: "\"original sin\"?", answer: "Because Adam and Eve chose to sin, all people are born in sin and have the tendency to sin. (Romans 5:12)" },
-            { id: 348, points: 20, isQuotation: false, bold: "What were the duties", rest: "of the Old Testament priest?", answer: "To intercede with God for the people and offer sacrifices to atone for their sins (Hebrews 5:1)" },
-            { id: 349, points: 20, isQuotation: false, bold: "First John 3:4 contains", rest: "what definition of sin?", answer: "Sin is breaking God's law and is contrary to the law of God. (1 John 3:4)" },
-            { id: 350, points: 20, isQuotation: false, bold: "James 4:17 contains", rest: "what definition of sin?", answer: "Knowing to do good but not doing it is sin. (James 4:17)" },
-            { id: 351, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Have all", rest: "people sinned?", answer: "Romans 3:23 For everyone has sinned; we all fall short of God's glorious standard." },
-            { id: 352, points: 20, isQuotation: false, bold: "What does Paul mean when he says that all have sinned", rest: "and fall short of God's glorious standard?", answer: "People, by their own ability, cannot attain the righteousness of God. (Romans 3:23)" },
-            { id: 353, points: 20, isQuotation: false, bold: "Paul said if God was for us no one could be against us.", rest: "How do we know God is for us?", answer: "God gave His Son [Jesus] to die for us. (Romans 8:31-32)" },
-            { id: 354, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Romans chapter five", rest: "which tells us the greatest proof of God's love.", answer: "Romans 5:8 But God showed his great love for us by sending Christ to die for us while we were still sinners." },
-            { id: 355, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus tell Nicodemus was necessary", rest: "for a person to see the kingdom of God?", answer: "John 3:3 \"I tell you the truth, unless you are born again, you cannot see the Kingdom of God.\"" },
-            { id: 356, points: 20, isQuotation: false, bold: "What does it mean", rest: "to be born again?", answer: "The Holy Spirit gives birth to spiritual life; we become a new person. (John 3:3-8; 2 Corinthians 5:17)" },
-            { id: 357, points: 20, isQuotation: false, bold: "What instructions did Paul give Christians", rest: "for getting along with other people?", answer: "Live in harmony with each other. Don't be too proud to enjoy the company of ordinary people. Don't think you know it all. (Romans 12:16)" },
-            { id: 358, points: 20, isQuotation: false, bold: "Is it God's will", rest: "for all people to be saved?", answer: "Yes, God wants all people to be saved, but each individual must personally choose Christ as Savior. (Romans 10:9-13; 1 Timothy 2:4; 2 Peter 3:9)" },
-            { id: 359, points: 20, isQuotation: false, bold: "What is the only sin", rest: "which will not be forgiven?", answer: "Willfully and knowingly speaking evil against [blaspheming] the Holy Spirit (Mark 3:28-29)" },
-            { id: 360, points: 20, isQuotation: false, bold: "Whom does God oppose,", rest: "and to whom does He give grace?", answer: "God opposes the proud but gives grace to the humble. (James 4:6)" },
-            { id: 361, points: 20, isQuotation: false, bold: "In Jesus' story of the Pharisee and tax collector, what was", rest: "the tax collector's prayer?", answer: "\"O God, be merciful to me, for I am a sinner.\" (Luke 18:13)" },
-            { id: 362, points: 20, isQuotation: false, bold: "What did the Prodigal Son say to his father", rest: "when he came back home?", answer: "\"Father, I have sinned against both heaven [God] and you, and I am no longer worthy of being called your son.\" (Luke 15:21)" },
-            { id: 363, points: 20, isQuotation: false, bold: "How important is the blood of Jesus", rest: "to our salvation?", answer: "Without the shedding of blood there is no forgiveness of sin. (Hebrews 9:22)" },
-            { id: 364, points: 20, isQuotation: false, bold: "What is meant by", rest: "the vicarious atonement?", answer: "Jesus [Christ] took the punishment for our sins when He died on Calvary, and if we accept Him as Savior we will not have to be punished by God. (Ephesians 1:7; 1 Peter 2:24)" },
-            { id: 365, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Romans chapter one", rest: "which tells us the power of the gospel.", answer: "Romans 1:16 For I am not ashamed of this Good News about Christ. It is the power of God at work, saving everyone who believes." },
-            { id: 366, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Ephesians chapter two", rest: "which tells us how we are saved.", answer: "Ephesians 2:8 God saved you by his grace when you believed. And you can't take credit for this; it is a gift from God." },
-            { id: 367, points: 20, isQuotation: false, bold: "In relationship to our salvation, what is meant by", rest: "\"adoption\"?", answer: "All the privileges of being a child of God, including inheriting eternal life, are restored. (Romans 8:15-17)" },
-            { id: 368, points: 20, isQuotation: false, bold: "Since we are saved because of what Jesus did and not what we do,", rest: "why should Christians do good things?", answer: "Because we are saved, we do good things to show our love for God. (Ephesians 2:10)" },
-            { id: 369, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What are the three great", rest: "Christian virtues?", answer: "1 Corinthians 13:13 Three things will last forever-faith, hope, and love-and the greatest of these is love." },
-            { id: 370, points: 20, isQuotation: false, bold: "According to Hebrews 11:6, those who come to God", rest: "must believe what?", answer: "They must believe that God exists and that He rewards those who sincerely seek Him. (Hebrews 11:6)" },
-            { id: 371, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the first and most important", rest: "commandment?", answer: "Mark 12:30 \"You must love the LORD your God with all your heart, all your soul, all your mind, and all your strength.\"" },
-            { id: 372, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the second-most important", rest: "commandment?", answer: "Mark 12:31 \"Love your neighbor as yourself.\"" },
-            { id: 373, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say was the greatest display of", rest: "love?", answer: "John 15:13 \"There is no greater love than to lay down one's life for one's friends.\"" },
-            { id: 374, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. How did Jesus say we may show our love", rest: "for Him?", answer: "John 14:15 \"If you love me, obey my commandments.\"" },
-            { id: 375, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Jesus say would cause the world to know that we are", rest: "His disciples?", answer: "John 13:35 \"Your love for one another will prove to the world that you are my disciples.\"" },
-            { id: 376, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Is it necessary that a Christian love", rest: "others?", answer: "1 John 4:7-8 Anyone who loves is a child of God and knows God. But anyone who does not love does not know God, for God is love." },
-            { id: 377, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse which tells why it is necessary to live a peaceful and holy", rest: "life.", answer: "Hebrews 12:14 Work at living in peace with everyone, and work at living a holy life, for those who are not holy will not see the Lord." },
-            { id: 378, points: 20, isQuotation: false, bold: "Why should we be careful", rest: "about what we think?", answer: "Because our thoughts determine who we are and what we say and do (Proverbs 4:23-27; Matthew 12:34-35)" },
-            { id: 379, points: 20, isQuotation: false, bold: "Why should a Christian keep pure in body and mind,", rest: "before and after marriage?", answer: "Because immoral behavior destroys the purity and happiness God intends marriage to have (Proverbs 5:15-18; 1 Corinthians 6:18-20; Hebrews 13:4)" },
-            { id: 380, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What does James say we must do", rest: "to keep from fooling ourselves?", answer: "James 1:22 But don't just listen to God's word. You must do what it says. Otherwise, you are only fooling yourselves." },
-            { id: 381, points: 20, isQuotation: false, bold: "Why were the Christians", rest: "at Berea honored?", answer: "Because they received the Word eagerly and studied the Scriptures every day (Acts 17:10-12)" },
-            { id: 382, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to First Thessalonians chapter five,", rest: "when should a Christian thank God?", answer: "1 Thessalonians 5:18 Be thankful in all circumstances, for this is God's will for you who belong to Christ Jesus." },
-            { id: 383, points: 20, isQuotation: false, bold: "According to Ecclesiastes 12:1,", rest: "when should we begin to seek God?", answer: "In our youth (Ecclesiastes 12:1)" },
-            { id: 384, points: 20, isQuotation: false, bold: "What did Paul tell Timothy", rest: "was great wealth?", answer: "True godliness with contentment is great wealth. (1 Timothy 6:6)" },
-            { id: 385, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What is", rest: "the Golden Rule?", answer: "Matthew 7:12 \"Do to others whatever you would like them to do to you.\"" },
-            { id: 386, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Philippians that expresses what the Christian's attitude should be", rest: "toward both life and death.", answer: "Philippians 1:21 For to me, living means living for Christ, and dying is even better." },
-            { id: 387, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What rule do we find in Proverbs", rest: "for avoiding trouble with others?", answer: "Proverbs 15:1 A gentle answer deflects anger, but harsh words make tempers flare." },
-            { id: 388, points: 20, isQuotation: false, bold: "How should we regard our school teachers, police officers,", rest: "and other government authorities?", answer: "We should obey them because their authority comes from God. (Romans 13:1-3)" },
-            { id: 389, points: 20, isQuotation: false, bold: "How should we regard our Sunday School teachers, pastors,", rest: "and other church leaders?", answer: "We should obey them because they are responsible to God for our souls. (1 Thessalonians 5:12-13; Hebrews 13:17)" },
-            { id: 390, points: 20, isQuotation: false, bold: "What does", rest: "\"intercession\" mean?", answer: "To pray to God for someone else (1 Timothy 2:1)" },
-            { id: 391, points: 20, isQuotation: false, bold: "Who intercedes", rest: "for the Christian?", answer: "The Holy Spirit and Jesus (Romans 8:26-27, 34; Hebrews 7:25)" },
-            { id: 392, points: 20, isQuotation: false, bold: "What does Romans 8:26 say", rest: "is the main weakness of our prayers?", answer: "We don't know what God wants us to pray for. (Romans 8:26)" },
-            { id: 393, points: 20, isQuotation: false, bold: "Why should a Christian not marry a person", rest: "who is not a Christian?", answer: "Because God's Word says we should not team up with an unbeliever (2 Corinthians 6:14-15)" },
-            { id: 394, points: 20, isQuotation: false, bold: "Is it a sin", rest: "to be tempted?", answer: "No, it is sin only when we yield to temptation. (Hebrews 4:15; James 1:12-15)" },
-            { id: 395, points: 20, isQuotation: false, bold: "According to First John, what are", rest: "the three common temptations?", answer: "Craving for physical pleasure, Craving for everything we see, Pride [in our achievements and possessions] (1 John 2:16)" },
-            { id: 396, points: 20, isQuotation: false, bold: "What are the three main sources", rest: "of temptation?", answer: "The devil, The world, Our own desires (Matthew 4:1; John 16:33; James 1:14; 1 John 2:16)" },
-            { id: 397, points: 20, isQuotation: false, bold: "What part did the Holy Spirit", rest: "have in creation?", answer: "The Spirit of God was hovering over the surface of the waters. (Genesis 1:2)" },
-            { id: 398, points: 20, isQuotation: false, bold: "Jesus said the Holy Spirit would convict, or reprove,", rest: "the world of what three things?", answer: "Sin, Righteousness, Judgment (John 16:8-11)" },
-            { id: 399, points: 20, isQuotation: false, bold: "Why does the Holy Spirit convict, or reprove,", rest: "the world of sin?", answer: "Because the world failed to believe on Jesus (John 16:8-9)" },
-            { id: 400, points: 20, isQuotation: false, bold: "Whom does", rest: "the Holy Spirit glorify?", answer: "Jesus [Christ] (John 16:13-14)" },
-            { id: 401, points: 20, isQuotation: false, bold: "What are the continuing spiritual evidences", rest: "of the Spirit-filled life?", answer: "Joy and contentment, Victory over sin, Ability [power] to share the gospel, Desire to know God and His Word (Acts 1:8...)" },
-            { id: 402, points: 20, isQuotation: false, bold: "The Holy Spirit guides", rest: "Christians into what?", answer: "Truth (John 16:13)" },
-            { id: 403, points: 20, isQuotation: false, bold: "What part does the Holy Spirit", rest: "have in our salvation?", answer: "The Holy Spirit convicts of sin and makes the repentant sinner a new person. (Titus 3:5-6; John 16:8-9)" },
-            { id: 404, points: 20, isQuotation: false, bold: "Does the Holy Spirit", rest: "dwell in every Christian?", answer: "Yes, the Holy Spirit comes into our hearts when we believe on Jesus. (Romans 8:9-11)" },
-            { id: 405, points: 20, isQuotation: false, bold: "What did Paul tell the Ephesians", rest: "was God's guarantee of our inheritance?", answer: "The Holy Spirit, promised long ago (Ephesians 1:13-14)" },
-            { id: 406, points: 20, isQuotation: false, bold: "Why did Jesus say it was necessary", rest: "that He go away?", answer: "So that the Advocate [Holy Spirit] might come. (John 16:7)" },
-            { id: 407, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to Zechariah,", rest: "how can we do God's work?", answer: "Zechariah 4:6 \"It is not by force nor by strength, but by my Spirit, says the LORD.\"" },
-            { id: 408, points: 20, isQuotation: false, bold: "When did God first baptize", rest: "believers in the Holy Spirit?", answer: "On the Day of Pentecost (Acts 2:1-4)" },
-            { id: 409, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Acts chapter two that describes the disciples of Jesus receiving", rest: "the outpouring of the Holy Spirit.", answer: "Acts 2:4 And everyone present was filled with the Holy Spirit and began speaking in other languages, as the Holy Spirit gave them this ability." },
-            { id: 410, points: 20, isQuotation: false, bold: "What were Jesus' disciples doing", rest: "in preparation for being baptized in the Holy Spirit?", answer: "They were praying. (Acts 1:14; 2:1)" },
-            { id: 411, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Peter tell the people at Pentecost to do in order to receive the gift of", rest: "the Holy Spirit?", answer: "Acts 2:38 \"Each of you must repent of your sins and turn to God, and be baptized in the name of Jesus Christ for the forgiveness of your sins. Then you will receive the gift of the Holy Spirit.\"" },
-            { id: 412, points: 20, isQuotation: false, bold: "Is the baptism in the Holy Spirit", rest: "the same as salvation?", answer: "No, Paul asked the Ephesian Christians if they had received the Holy Spirit since they believed. (Acts 19:2)" },
-            { id: 413, points: 20, isQuotation: false, bold: "What are the purposes of the baptism", rest: "in the Holy Spirit?", answer: "To help us know Christ [Jesus] better, To assist us in understanding God's Word, To give us power to witness (John 15:26; 16:13; Acts 1:8)" },
-            { id: 414, points: 20, isQuotation: false, bold: "What is the initial physical evidence", rest: "of the baptism in the Holy Spirit?", answer: "Speaking in other languages [tongues] as the Holy Spirit enables (Acts 2:4)" },
-            { id: 415, points: 20, isQuotation: false, bold: "Why do we believe that speaking with other tongues is the initial physical evidence", rest: "of the baptism in the Holy Spirit?", answer: "Because it is the pattern of the New Testament Church (Acts 2:4; 10:45-46; 19:6)" },
-            { id: 416, points: 20, isQuotation: false, bold: "What is", rest: "the Church?", answer: "A body [company] of born-again people who have been called out from the world; who have faith in and give allegiance to the Lord Jesus Christ (Colossians 1:18-24; 1 Peter 2:9)" },
-            { id: 417, points: 20, isQuotation: false, bold: "What three things does Paul say", rest: "make up God's kingdom?", answer: "Righteousness [living a life of goodness], Peace, Joy in the Holy Spirit. (Romans 14:17)" },
-            { id: 435, points: 20, isQuotation: false, bold: "Who should be", rest: "baptized in water?", answer: "Every person who believes in Jesus [Christ] as Savior (Matthew 28:19; Acts 2:38, 41)" },
-            { id: 436, points: 20, isQuotation: false, bold: "What is the proper method", rest: "of water baptism?", answer: "Immersion in water (Acts 8:38-39)" },
-            { id: 437, points: 20, isQuotation: false, bold: "In whose name", rest: "should Christians be baptized?", answer: "In the name of the Father, and the Son, and the Holy Spirit (Matthew 28:19)" },
-            { id: 438, points: 20, isQuotation: false, bold: "In Communion, what is symbolized", rest: "by the bread and the cup?", answer: "The bread represents the body of Jesus, and the cup represents His blood which He shed for our sins. (1 Corinthians 11:23-25)" },
-            { id: 439, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse from First Corinthians in which Paul explains the purpose of", rest: "the Lord's Supper.", answer: "1 Corinthians 11:26 For every time you eat this bread and drink this cup, you are announcing the Lord's death until he comes again." },
-            { id: 440, points: 20, isQuotation: false, bold: "At the Communion service, who is to judge", rest: "who is worthy to partake?", answer: "Everyone should examine themselves. (1 Corinthians 11:28)" },
-            { id: 441, points: 20, isQuotation: false, bold: "How did death", rest: "come into the world?", answer: "Death first came as a result of willful sin. (Romans 5:12; 1 Timothy 2:14)" },
-            { id: 442, points: 20, isQuotation: false, bold: "What prophecy did Isaiah make", rest: "concerning Jesus' power to heal?", answer: "He took our sicknesses and removed our diseases. (Isaiah 53:4-5; Matthew 8:17)" },
-            { id: 443, points: 20, isQuotation: false, bold: "What was the purpose", rest: "of Jesus' miracles?", answer: "They showed God the Father's endorsement [approval] of Him. (Acts 2:22)" },
-            { id: 444, points: 20, isQuotation: false, bold: "What is a great lesson", rest: "from the Book of Job?", answer: "Not all misfortune which comes to a believer is punishment for sin." },
-            { id: 445, points: 20, isQuotation: false, bold: "What does James instruct us to do", rest: "if we are sick?", answer: "We should ask the elders [ministers] to anoint us with oil and pray for God to heal us. (James 5:14-16)" },
-            { id: 446, points: 20, isQuotation: false, bold: "What is the Christian's", rest: "Blessed Hope?", answer: "The return of Jesus [Christ] (Titus 2:13)" },
-            { id: 447, points: 20, isQuotation: false, bold: "What is", rest: "the Rapture?", answer: "When Jesus [Christ] returns to take His Church-the believers both dead and living-out of this world (1 Thessalonians 4:16-17)" },
-            { id: 448, points: 20, isQuotation: false, bold: "Who knows when", rest: "the Rapture will occur?", answer: "Only God the Father (Matthew 24:36)" },
-            { id: 449, points: 20, isQuotation: false, bold: "Why should the coming of Jesus", rest: "not surprise the Christians?", answer: "Because Christians do not live in the darkness (1 Thessalonians 5:4)" },
-            { id: 450, points: 20, isQuotation: false, bold: "What two events will happen in heaven", rest: "shortly after the Rapture?", answer: "The judgment of Christians and the wedding feast of the Lamb (2 Corinthians 5:10; Revelation 19:7-9)" },
-            { id: 451, points: 20, isQuotation: false, bold: "What is", rest: "the Great Tribulation?", answer: "The Great Tribulation is a period of extreme trouble and turmoil before the final judgment. (Matthew 24:21)" },
-            { id: 452, points: 20, isQuotation: false, bold: "What do we mean when we speak of", rest: "the Antichrist?", answer: "The man who will rule the world during the Great Tribulation and will attempt to make all people worship him as God (2 Thessalonians 2:3-4; 1 John 2:18; 4:3)" },
-            { id: 453, points: 20, isQuotation: false, bold: "What is", rest: "the Millennium?", answer: "A future period of one thousand years when Jesus [Christ] shall rule over the earth (Revelation 20:4)" },
-            { id: 454, points: 20, isQuotation: false, bold: "What will happen to Satan", rest: "during the Millennium?", answer: "He will be imprisoned in a bottomless pit so that he cannot tempt people. (Revelation 20:1-3)" },
-            { id: 455, points: 20, isQuotation: false, bold: "What will happen at the conclusion", rest: "of the Millennium?", answer: "Satan will be loosed from the bottomless pit, and Christ [Jesus] will completely conquer him and his followers. (Revelation 20:1-3, 7-10)" },
-            { id: 456, points: 20, isQuotation: false, bold: "What two appointments", rest: "will all people keep?", answer: "Death and judgment (Hebrews 9:27)" },
-            { id: 457, points: 20, isQuotation: false, bold: "What is", rest: "heaven?", answer: "Heaven is the place of eternal joy which God is preparing for those who love Him and accept Jesus [Christ] as their Savior. (Matthew 25:34; John 14:1-3...)" },
-            { id: 458, points: 20, isQuotation: false, bold: "What is done by everyone", rest: "who looks for Christ's appearing?", answer: "They keep themselves pure. (1 John 3:2-3)" },
-            { id: 459, points: 20, isQuotation: false, bold: "Who will spend", rest: "eternity in heaven?", answer: "Those who accept Christ [Jesus] as Savior and whose names are written in the Lamb's Book of Life (Revelation 21:1-27)" },
-            { id: 460, points: 20, isQuotation: false, bold: "Name five things", rest: "that will not be found in heaven.", answer: "Tears, Sorrow, Death, Pain, Evil (Revelation 21:4, 27)" },
-            { id: 461, points: 20, isQuotation: false, bold: "What is the last enemy", rest: "to be destroyed?", answer: "Death (1 Corinthians 15:25-26)" },
-            { id: 462, points: 20, isQuotation: false, bold: "What is", rest: "hell?", answer: "A place of eternal fire, punishment, and torment (Mark 9:43-48; Luke 16:19-31; Revelation 20:10)" },
-            { id: 463, points: 20, isQuotation: false, bold: "For whom did God", rest: "prepare hell?", answer: "The devil and his demons (Matthew 25:41)" },
-            { id: 464, points: 20, isQuotation: false, bold: "Who will spend eternity", rest: "in the lake of fire?", answer: "All who refuse Christ [Jesus] as Savior and whose names are not written in the Lamb's Book of Life (Revelation 20:15; 21:27)" },
-            { id: 465, points: 20, isQuotation: false, bold: "Where did", rest: "the devil come from?", answer: "The devil [Satan] was an angel whom God had to punish for trying to make himself greater than God. (Isaiah 14:12-15; Ezekiel 28:11-18)" },
-            { id: 466, points: 20, isQuotation: false, bold: "Why is the devil not", rest: "as powerful as God?", answer: "The devil was created by God and has been defeated by Jesus' death and resurrection. (John 16:11; Colossians 1:16; 2:13-15)" },
-            { id: 467, points: 20, isQuotation: false, bold: "Why can't evil powers", rest: "control a Christian?", answer: "Because the [Holy] Spirit who lives in you is greater than the spirit who lives in the world (1 John 4:4)" },
-            { id: 468, points: 20, isQuotation: false, bold: "What should a Christian's attitude be toward spiritism, astrology,", rest: "and other occult practices?", answer: "Christians should avoid all occult practices because Scripture specifically forbids them. (Deuteronomy 18:10-13; Isaiah 47:12-15)" },
-            { id: 469, points: 20, isQuotation: false, bold: "What happens to a Christian's soul and spirit", rest: "at death?", answer: "The Christian's soul and spirit go immediately to be with the Lord. (2 Corinthians 5:8)" },
-            { id: 470, points: 20, isQuotation: false, bold: "What story of Jesus indicates that both the righteous and the wicked", rest: "are conscious after death?", answer: "The story of Lazarus and the rich man (Luke 16:19-31)" },
-            { id: 471, points: 20, isQuotation: false, bold: "What confession of faith in eternal life and resurrection", rest: "did Job make?", answer: "Job declared that even though he would die and his body decay he would be resurrected and see God. (Job 19:25-26)" },
-            { id: 472, points: 20, isQuotation: false, bold: "Who will", rest: "be resurrected?", answer: "Both the righteous and the wicked-the righteous to receive eternal life and the wicked to receive eternal punishment (John 5:28-29)" },
-            { id: 473, points: 20, isQuotation: false, bold: "Which chapter of the Bible", rest: "is known as the \"resurrection chapter\"?", answer: "1 Corinthians 15" },
-            { id: 474, points: 20, isQuotation: false, bold: "In First Corinthians chapter fifteen, what illustration does Paul use", rest: "to explain the resurrection of Christians?", answer: "The sprouting of a new plant from a seed (1 Corinthians 15:35-44)" },
-            { id: 475, points: 20, isQuotation: false, bold: "There are over how many references in the New Testament", rest: "to the second coming of Christ?", answer: "[Over] three hundred" },
-            { id: 476, points: 20, isQuotation: false, bold: "When will Christians who have died", rest: "be resurrected?", answer: "At the rapture of the Church (1 Thessalonians 4:16-17)" },
-            { id: 477, points: 20, isQuotation: false, bold: "Jesus said that the age or time of His return will be like", rest: "the days of whom?", answer: "Noah and Lot (Luke 17:26-28)" },
-            { id: 478, points: 20, isQuotation: false, bold: "What do we mean when we speak of the", rest: "\"revelation\" of Christ?", answer: "His return to earth to rule and reign for one thousand years following the Great Tribulation (2 Thessalonians 2:5-8; Revelation 20:4-6)" },
-            { id: 479, points: 20, isQuotation: false, bold: "What two great events", rest: "comprise the second coming of Christ?", answer: "The Rapture and Christ's revelation (1 Thessalonians 4:16-17; 2 Thessalonians 2:8)" },
-            { id: 480, points: 20, isQuotation: false, bold: "Which of Jesus' parables tells us that some who claim to be Christians", rest: "will be unprepared for His return?", answer: "The Parable of the Five Wise and Five Foolish Bridesmaids (Matthew 25:1-13)" },
+            // --- 20-POINT QUESTIONS ---
+            { id: 289, points: 20, isQuotation: false, bold: "How did God give us the Bible?", rest: "The Holy Spirit inspired holy men, giving them both the truth and the words to write.", full: "How did God give us the Bible? The Holy Spirit inspired holy men, giving them both the truth and the words to write." },
+            { id: 298, points: 20, isQuotation: false, bold: "Who are the four major prophets?", rest: "Isaiah, Jeremiah, Ezekiel, Daniel", full: "Who are the four major prophets? Isaiah, Jeremiah, Ezekiel, Daniel" },
+            { id: 385, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What is the Golden Rule?", rest: "Matthew 7:12 \"Do to others whatever you would like them to do to you.\"", full: "QUOTATION QUESTION. What is the Golden Rule? Matthew 7:12 \"Do to others whatever you would like them to do to you.\"" },
+            { id: 386, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Philippians that expresses what the Christian's attitude should be toward both life and death.", rest: "Philippians 1:21 For to me, living means living for Christ, and dying is even better.", full: "QUOTATION QUESTION. Quote the verse of Philippians that expresses what the Christian's attitude should be toward both life and death. Philippians 1:21 For to me, living means living for Christ, and dying is even better." },
+            { id: 387, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What rule do we find in Proverbs for avoiding trouble with others?", rest: "Proverbs 15:1 A gentle answer deflects anger, but harsh words make tempers flare.", full: "QUOTATION QUESTION. What rule do we find in Proverbs for avoiding trouble with others? Proverbs 15:1 A gentle answer deflects anger, but harsh words make tempers flare." },
+            { id: 388, points: 20, isQuotation: false, bold: "How should we regard our school teachers, police officers, and other government authorities?", rest: "We should obey them because their authority comes from God. (Romans 13:1-3)", full: "How should we regard our school teachers, police officers, and other government authorities? We should obey them because their authority comes from God. (Romans 13:1-3)" },
+            { id: 389, points: 20, isQuotation: false, bold: "How should we regard our Sunday School teachers, pastors, and other church leaders?", rest: "We should obey them because they are responsible to God for our souls. (1 Thessalonians 5:12-13; Hebrews 13:17)", full: "How should we regard our Sunday School teachers, pastors, and other church leaders? We should obey them because they are responsible to God for our souls. (1 Thessalonians 5:12-13; Hebrews 13:17)" },
+            { id: 390, points: 20, isQuotation: false, bold: "What does \"intercession\" mean?", rest: "To pray to God for someone else (1 Timothy 2:7)", full: "What does \"intercession\" mean? To pray to God for someone else (1 Timothy 2:7)" },
+            { id: 391, points: 20, isQuotation: false, bold: "Who intercedes for the Christian?", rest: "The Holy Spirit and Jesus (Romans 8:26-27, 34; Hebrews 7:25)", full: "Who intercedes for the Christian? The Holy Spirit and Jesus (Romans 8:26-27, 34; Hebrews 7:25)" },
+            { id: 392, points: 20, isQuotation: false, bold: "What does Romans 8:26 say is the main weakness of our prayers?", rest: "We don't know what God wants us to pray for. (Romans 8:26)", full: "What does Romans 8:26 say is the main weakness of our prayers? We don't know what God wants us to pray for. (Romans 8:26)" },
+            { id: 393, points: 20, isQuotation: false, bold: "Why should a Christian not marry a person who is not a Christian?", rest: "Because God's Word says we should not team up with an unbeliever (2 Corinthians 6:14-15)", full: "Why should a Christian not marry a person who is not a Christian? Because God's Word says we should not team up with an unbeliever (2 Corinthians 6:14-15)" },
+            { id: 394, points: 20, isQuotation: false, bold: "Is it a sin to be tempted?", rest: "No, it is sin only when we yield to temptation. (Hebrews 4:15; James 1:12-15)", full: "Is it a sin to be tempted? No, it is sin only when we yield to temptation. (Hebrews 4:15; James 1:12-15)" },
+            { id: 395, points: 20, isQuotation: false, bold: "According to First John, what are the three common temptations?", rest: "Craving for physical pleasure. Craving for everything we see. Pride [in our achievements and possessions]. (1 John 2:16)", full: "According to First John, what are the three common temptations? Craving for physical pleasure. Craving for everything we see. Pride [in our achievements and possessions]. (1 John 2:16)" },
+            { id: 396, points: 20, isQuotation: false, bold: "What are the three main sources of temptation?", rest: "The devil, The world, Our own desires (Matthew 4:1; John 16:33; James 1:14; 1 John 2:16)", full: "What are the three main sources of temptation? The devil, The world, Our own desires (Matthew 4:1; John 16:33; James 1:14; 1 John 2:16)" },
+            { id: 397, points: 20, isQuotation: false, bold: "What part did the Holy Spirit have in creation?", rest: "The Spirit of God was hovering over the surface of the waters. (Genesis 1:2)", full: "What part did the Holy Spirit have in creation? The Spirit of God was hovering over the surface of the waters. (Genesis 1:2)" },
+            { id: 398, points: 20, isQuotation: false, bold: "Jesus said the Holy Spirit would convict, or reprove, the world of what three things?", rest: "Sin, Righteousness, Judgment (John 16:8-11)", full: "Jesus said the Holy Spirit would convict, or reprove, the world of what three things? Sin, Righteousness, Judgment (John 16:8-11)" },
+            { id: 399, points: 20, isQuotation: false, bold: "Why does the Holy Spirit convict, or reprove, the world of sin?", rest: "Because the world failed to believe on Jesus (John 16:8-9)", full: "Why does the Holy Spirit convict, or reprove, the world of sin? Because the world failed to believe on Jesus (John 16:8-9)" },
+            { id: 400, points: 20, isQuotation: false, bold: "Whom does the Holy Spirit glorify?", rest: "Jesus [Christ] (John 16:13-14)", full: "Whom does the Holy Spirit glorify? Jesus [Christ] (John 16:13-14)" },
+            { id: 401, points: 20, isQuotation: false, bold: "What are the continuing spiritual evidences of the Spirit-filled life?", rest: "Joy and contentment, Victory over sin, Ability [power] to share the gospel, Desire to know God and His Word (Acts 1:8; Romans 8:5-6, 13; Galatians 5:22-23; Ephesians 1:17)", full: "What are the continuing spiritual evidences of the Spirit-filled life? Joy and contentment, Victory over sin, Ability [power] to share the gospel, Desire to know God and His Word (Acts 1:8; Romans 8:5-6, 13; Galatians 5:22-23; Ephesians 1:17)" },
+            { id: 402, points: 20, isQuotation: false, bold: "The Holy Spirit guides Christians into what?", rest: "Truth (John 16:13)", full: "The Holy Spirit guides Christians into what? Truth (John 16:13)" },
+            { id: 403, points: 20, isQuotation: false, bold: "What part does the Holy Spirit have in our salvation?", rest: "The Holy Spirit convicts of sin and makes the repentant sinner a new person. (Titus 3:5-6; John 16:8-9)", full: "What part does the Holy Spirit have in our salvation? The Holy Spirit convicts of sin and makes the repentant sinner a new person. (Titus 3:5-6; John 16:8-9)" },
+            { id: 404, points: 20, isQuotation: false, bold: "Does the Holy Spirit dwell in every Christian?", rest: "Yes, the Holy Spirit comes into our hearts when we believe on Jesus. (Romans 8:9-11)", full: "Does the Holy Spirit dwell in every Christian? Yes, the Holy Spirit comes into our hearts when we believe on Jesus. (Romans 8:9-11)" },
+            { id: 405, points: 20, isQuotation: false, bold: "What did Paul tell the Ephesians was God's guarantee of our inheritance?", rest: "The Holy Spirit, promised long ago (Ephesians 1:13-14)", full: "What did Paul tell the Ephesians was God's guarantee of our inheritance? The Holy Spirit, promised long ago (Ephesians 1:13-14)" },
+            { id: 406, points: 20, isQuotation: false, bold: "Why did Jesus say it was necessary that He go away?", rest: "So that the Advocate [Holy Spirit] might come. (John 16:7)", full: "Why did Jesus say it was necessary that He go away? So that the Advocate [Holy Spirit] might come. (John 16:7)" },
+            { id: 407, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. According to Zechariah, how can we do God's work?", rest: "Zechariah 4:6 \"It is not by force nor by strength, but by my Spirit, says the LORD.\"", full: "QUOTATION QUESTION. According to Zechariah, how can we do God's work? Zechariah 4:6 \"It is not by force nor by strength, but by my Spirit, says the LORD.\"" },
+            { id: 408, points: 20, isQuotation: false, bold: "When did God first baptize believers in the Holy Spirit?", rest: "On the Day of Pentecost (Acts 2:1-4)", full: "When did God first baptize believers in the Holy Spirit? On the Day of Pentecost (Acts 2:1-4)" },
+            { id: 409, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Acts chapter two that describes the disciples of Jesus receiving the outpouring of the Holy Spirit.", rest: "Acts 2:4 And everyone present was filled with the Holy Spirit and began speaking in other languages, as the Holy Spirit gave them this ability.", full: "QUOTATION QUESTION. Quote the verse of Acts chapter two that describes the disciples of Jesus receiving the outpouring of the Holy Spirit. Acts 2:4 And everyone present was filled with the Holy Spirit and began speaking in other languages, as the Holy Spirit gave them this ability." },
+            { id: 410, points: 20, isQuotation: false, bold: "What were Jesus' disciples doing in preparation for being baptized in the Holy Spirit?", rest: "They were praying. (Acts 1:14; 2:1)", full: "What were Jesus' disciples doing in preparation for being baptized in the Holy Spirit? They were praying. (Acts 1:14; 2:1)" },
+            { id: 411, points: 20, isQuotation: true, bold: "QUOTATION QUESTION. What did Peter tell the people at Pentecost to do in order to receive the gift of the Holy Spirit?", rest: "Acts 2:38 \"Each of you must repent of your sins and turn to God, and be baptized in the name of Jesus Christ for the forgiveness of your sins. Then you will receive the gift of the Holy Spirit.\"", full: "QUOTATION QUESTION. What did Peter tell the people at Pentecost to do in order to receive the gift of the Holy Spirit? Acts 2:38 \"Each of you must repent of your sins and turn to God, and be baptized in the name of Jesus Christ for the forgiveness of your sins. Then you will receive the gift of the Holy Spirit.\"" },
+            { id: 412, points: 20, isQuotation: false, bold: "Is the baptism in the Holy Spirit the same as salvation?", rest: "No, Paul asked the Ephesian Christians if they had received the Holy Spirit since they believed. (Acts 19:2)", full: "Is the baptism in the Holy Spirit the same as salvation? No, Paul asked the Ephesian Christians if they had received the Holy Spirit since they believed. (Acts 19:2)" },
+            { id: 413, points: 20, isQuotation: false, bold: "What are the purposes of the baptism in the Holy Spirit?", rest: "To help us know Christ [Jesus] better. To assist us in understanding God's Word. To give us power to witness. (John 15:26; 16:13; Acts 1:8)", full: "What are the purposes of the baptism in the Holy Spirit? To help us know Christ [Jesus] better. To assist us in understanding God's Word. To give us power to witness. (John 15:26; 16:13; Acts 1:8)" },
+            { id: 414, points: 20, isQuotation: false, bold: "What is the initial physical evidence of the baptism in the Holy Spirit?", rest: "Speaking in other languages [tongues] as the Holy Spirit enables (Acts 2:4)", full: "What is the initial physical evidence of the baptism in the Holy Spirit? Speaking in other languages [tongues] as the Holy Spirit enables (Acts 2:4)" },
+            { id: 415, points: 20, isQuotation: false, bold: "Why do we believe that speaking with other tongues is the initial physical evidence of the baptism in the Holy Spirit?", rest: "Because it is the pattern of the New Testament Church (Acts 2:4; 10:45-46; 19:6)", full: "Why do we believe that speaking with other tongues is the initial physical evidence of the baptism in the Holy Spirit? Because it is the pattern of the New Testament Church (Acts 2:4; 10:45-46; 19:6)" },
+            { id: 416, points: 20, isQuotation: false, bold: "What is the Church?", rest: "A body [company] of born-again people who have been called out from the world; who have faith in and give allegiance to the Lord Jesus Christ (Colossians 1:18-24; 1 Peter 2:9)", full: "What is the Church? A body [company] of born-again people who have been called out from the world; who have faith in and give allegiance to the Lord Jesus Christ (Colossians 1:18-24; 1 Peter 2:9)" },
+            { id: 417, points: 20, isQuotation: false, bold: "What three things does Paul say make up God's kingdom?", rest: "Righteousness [living a life of goodness], Peace, Joy in the Holy Spirit. (Romans 14:17)", full: "What three things does Paul say make up God's kingdom? Righteousness [living a life of goodness], Peace, Joy in the Holy Spirit. (Romans 14:17)" },
+            { id: 418, points: 20, isQuotation: false, bold: "Who is the Head of the Church?", rest: "Jesus [Christ] (Ephesians 4:15)", full: "Who is the Head of the Church? Jesus [Christ] (Ephesians 4:15)" },
+            { id: 419, points: 20, isQuotation: false, bold: "Who is the foundation of the Church?", rest: "Jesus [Christ] (1 Corinthians 3:11)", full: "Who is the foundation of the Church? Jesus [Christ] (1 Corinthians 3:11)" },
+            { id: 420, points: 20, isQuotation: false, bold: "How does Jeremiah 1:5 proclaim God's value and plan for our life?", rest: "[The LORD gave me this message:] \"I knew you before I formed you in your mother's womb. Before you were born I set you apart.\" (Jeremiah 1:4-5)", full: "How does Jeremiah 1:5 proclaim God's value and plan for our life? [The LORD gave me this message:] \"I knew you before I formed you in your mother's womb. Before you were born I set you apart.\" (Jeremiah 1:4-5)" },
 
-            // --- 30-POINT QUESTIONS (#481 - #576) ---
-            { id: 481, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. According to Romans", rest: "chapter eight, what things cannot separate us from God's love?", answer: "Romans 8:38-39 And I am convinced that nothing can ever separate us from God's love..." },
-            { id: 485, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Is all", rest: "the Bible inspired?", answer: "2 Timothy 3:16 All Scripture is inspired by God and is useful to teach us what is true and to make us realize what is wrong in our lives." },
-            { id: 529, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Do all", rest: "things that happen to a Christian have a purpose?", answer: "Romans 8:28 And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them." },
-            { id: 530, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What should be", rest: "our greatest goal in life?", answer: "Matthew 6:33 \"Seek the Kingdom of God above all else, and live righteously, and he will give you everything you need.\"" },
-            { id: 576, points: 30, isQuotation: false, bold: "From Proverbs chapter six,", rest: "list five things which God hates.", answer: "Proud look, Lying tongue, Hands that kill the innocent, Heart that plots evil, Feet that rush to do wrong, False witness, One who causes trouble. (Proverbs 6:16-19)" }
+            // --- 30-POINT QUESTIONS ---
+            { id: 481, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. According to Romans chapter eight, what things cannot separate us from God's love?", rest: "Romans 8:38-39 And I am convinced that nothing can ever separate from God's love.", full: "QUOTATION QUESTION. According to Romans chapter eight, what things cannot separate us from God's love? Romans 8:38-39 And I am convinced that nothing can ever separate from God's love." },
+            { id: 485, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Is all the Bible inspired?", rest: "2 Timothy 3:16 All Scripture is inspired by God and is useful to teach us what is true and to make us realize what is wrong in our lives.", full: "QUOTATION QUESTION. Is all the Bible inspired? 2 Timothy 3:16 All Scripture is inspired by God and is useful to teach us what is true and to make us realize what is wrong in our lives." },
+            { id: 529, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Do all things that happen to a Christian have a purpose?", rest: "Romans 8:28 And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them.", full: "QUOTATION QUESTION. Do all things that happen to a Christian have a purpose? Romans 8:28 And we know that God causes everything to work together for the good of those who love God and are called according to his purpose for them." },
+            { id: 530, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What should be our greatest goal in life?", rest: "Matthew 6:33 \"Seek the Kingdom of God above all else, and live righteously, and he will give you everything you need.\"", full: "QUOTATION QUESTION. What should be our greatest goal in life? Matthew 6:33 \"Seek the Kingdom of God above all else, and live righteously, and he will give you everything you need.\"" },
+            { id: 531, points: 30, isQuotation: false, bold: "What does the Bible say to do when others pressure us to disobey God?", rest: "Do not follow others to do what is wrong. Obey God rather than human authority. (Exodus 23:2; Proverbs 1:10; Acts 5:29)", full: "What does the Bible say to do when others pressure us to disobey God? Do not follow others to do what is wrong. Obey God rather than human authority. (Exodus 23:2; Proverbs 1:10; Acts 5:29)" },
+            { id: 532, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Quote the Lord's Prayer.", rest: "Matthew 6:9-13 \"Our Father in heaven, may your name be kept holy. May your Kingdom come soon. May your will be done on earth, as it is in heaven. Give us today the food we need, and forgive us our sins, as we have forgiven those who sin against us. And don't let us yield to temptation, but rescue us from the evil one.\"", full: "QUOTATION QUESTION. Quote the Lord's Prayer. Matthew 6:9-13 \"Our Father in heaven, may your name be kept holy. May your Kingdom come soon. May your will be done on earth, as it is in heaven. Give us today the food we need, and forgive us our sins, as we have forgiven those who sin against us. And don't let us yield to temptation, but rescue us from the evil one.\"" },
+            { id: 533, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. From the first Psalm, quote the definition of the blessed person.", rest: "Psalm 1:1 Oh, the joys of those who do not follow the advice of the wicked, or stand around with sinners, or join in with mockers.", full: "QUOTATION QUESTION. From the first Psalm, quote the definition of the blessed person. Psalm 1:1 Oh, the joys of those who do not follow the advice of the wicked, or stand around with sinners, or join in with mockers." },
+            { id: 534, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse in Psalms which tells us why believers do not need to fear.", rest: "Psalm 23:4 Even when I walk through the darkest valley, I will not be afraid, for you are close beside me. Your rod and your staff protect and comfort me.", full: "QUOTATION QUESTION. Quote the verse in Psalms which tells us why believers do not need to fear. Psalm 23:4 Even when I walk through the darkest valley, I will not be afraid, for you are close beside me. Your rod and your staff protect and comfort me." },
+            { id: 535, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Why can we not trust our own judgment in choosing the right way to live?", rest: "Proverbs 14:12 There is a path before each person that seems right, but it ends in death.", full: "QUOTATION QUESTION. Why can we not trust our own judgment in choosing the right way to live? Proverbs 14:12 There is a path before each person that seems right, but it ends in death." },
+            { id: 536, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What is the Christian's first responsibility in witnessing to the lost?", rest: "Matthew 5:16 \"Let your good deeds shine out for all to see, so that everyone will praise your heavenly Father.\"", full: "QUOTATION QUESTION. What is the Christian's first responsibility in witnessing to the lost? Matthew 5:16 \"Let your good deeds shine out for all to see, so that everyone will praise your heavenly Father.\"" },
+            { id: 537, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What are the two verses in Matthew chapter six which tell us where we should store up treasures and why?", rest: "Matthew 6:20-21 \"Store your treasures in heaven, where moths and rust cannot destroy, and thieves do not break in and steal. Wherever your treasure is, there the desires of your heart will also be.\"", full: "QUOTATION QUESTION. What are the two verses in Matthew chapter six which tell us where we should store up treasures and why? Matthew 6:20-21 \"Store your treasures in heaven, where moths and rust cannot destroy, and thieves do not break in and steal. Wherever your treasure is, there the desires of your heart will also be.\"" },
+            { id: 538, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. According to Romans twelve verse one, what does God desire from each Christian?", rest: "Romans 12:1 And so, dear brothers and sisters, I plead with you to give your bodies to God because of all he has done for you. Let them be a living and holy sacrifice—the kind he will find acceptable. This is truly the way to worship him.", full: "QUOTATION QUESTION. According to Romans twelve verse one, what does God desire from each Christian? Romans 12:1 And so, dear brothers and sisters, I plead with you to give your bodies to God because of all he has done for you. Let them be a living and holy sacrifice—the kind he will find acceptable. This is truly the way to worship him." },
+            { id: 539, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Philippians that tells us what to do instead of worrying.", rest: "Philippians 4:6 Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done.", full: "QUOTATION QUESTION. Quote the verse of Philippians that tells us what to do instead of worrying. Philippians 4:6 Don't worry about anything; instead, pray about everything. Tell God what you need, and thank him for all he has done." },
+            { id: 540, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. Quote the verse of Philippians that tells us what we should think about.", rest: "Philippians 4:8 And now, dear brothers and sisters, one final thing. Fix your thoughts on what is true, and honorable, and right, and pure, and lovely, and admirable. Think about things that are excellent and worthy of praise.", full: "QUOTATION QUESTION. Quote the verse of Philippians that tells us what we should think about. Philippians 4:8 And now, dear brothers and sisters, one final thing. Fix your thoughts on what is true, and honorable, and right, and pure, and lovely, and admirable. Think about things that are excellent and worthy of praise." },
+            { id: 541, points: 30, isQuotation: false, bold: "Why should we not drink alcoholic beverages?", rest: "Wine produces mockers; alcohol leads to brawls. Those led astray by drink cannot be wise. (Proverbs 20:1; 23:29-33)", full: "Why should we not drink alcoholic beverages? Wine produces mockers; alcohol leads to brawls. Those led astray by drink cannot be wise. (Proverbs 20:1; 23:29-33)" },
+            { id: 542, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What should be our prayer about our speech and thoughts?", rest: "Psalm 19:14 May the words of my mouth and the meditation of my heart be pleasing to you, O LORD, my rock and my redeemer.", full: "QUOTATION QUESTION. What should be our prayer about our speech and thoughts? Psalm 19:14 May the words of my mouth and the meditation of my heart be pleasing to you, O LORD, my rock and my redeemer." },
+            { id: 543, points: 30, isQuotation: false, bold: "How can Christians live victoriously over sin?", rest: "By yielding to God, claiming identification with the death and resurrection of Jesus, and allowing the [Holy] Spirit to lead us (Romans 6:11-13; 8:13-14; Galatians 2:20)", full: "How can Christians live victoriously over sin? By yielding to God, claiming identification with the death and resurrection of Jesus, and allowing the [Holy] Spirit to lead us (Romans 6:11-13; 8:13-14; Galatians 2:20)" },
+            { id: 544, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. How do we know we can resist temptation?", rest: "1 Corinthians 10:13 The temptations in your life are no different from what others experience. And God is faithful. He will not allow the temptation to be more than you can stand. When you are tempted, he will show you a way out so that you can endure.", full: "QUOTATION QUESTION. How do we know we can resist temptation? 1 Corinthians 10:13 The temptations in your life are no different from what others experience. And God is faithful. He will not allow the temptation to be more than you can stand. When you are tempted, he will show you a way out so that you can endure." },
+            { id: 545, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. What does an Old Testament proverb say about hiding our sins?", rest: "Proverbs 28:13 People who conceal their sins will not prosper, but if they confess and turn from them, they will receive mercy.", full: "QUOTATION QUESTION. What does an Old Testament proverb say about hiding our sins? Proverbs 28:13 People who conceal their sins will not prosper, but if they confess and turn from them, they will receive mercy." },
+            { id: 546, points: 30, isQuotation: true, bold: "QUOTATION QUESTION. According to the First Epistle of John, what should Christians do if they sin?", rest: "1 John 1:9 But if we confess our sins to him, he is faithful and just to forgive us our sins and to cleanse us from all wickedness.", full: "QUOTATION QUESTION. According to the First Epistle of John, what should Christians do if they sin? 1 John 1:9 But if we confess our sins to him, he is faithful and just to forgive us our sins and to cleanse us from all wickedness." }
         ];
 
         let currentPool = [];
+        let initialPoolSize = 0;
         let activeQuestion = null;
         let score = 0;
         let stats = { attempted: 0, correct: 0, incorrect: 0, totalBuzzTime: 0, fastestBuzz: 999999 };
@@ -703,17 +560,9 @@
         let questionActive = false;
         let questionStartTime = 0;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.onvoiceschanged = populateVoices;
-                setTimeout(populateVoices, 250);
-            }
-        });
-
         function startGame(category) {
             initAudio();
             updateSettingsFromUI();
-            initSpeechRecognition();
 
             const minId = parseInt(document.getElementById('range-min').value) || 1;
             const maxId = parseInt(document.getElementById('range-max').value) || 576;
@@ -731,6 +580,8 @@
                 return;
             }
 
+            initialPoolSize = currentPool.length;
+
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('summary-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -745,7 +596,6 @@
 
         function returnToMenu() {
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if (recognition && isListening) recognition.stop();
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             questionActive = false;
@@ -757,7 +607,6 @@
 
         function skipQuestion() {
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if (recognition && isListening) recognition.stop();
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             questionActive = false;
@@ -776,7 +625,6 @@
 
         function loadNextQuestion() {
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if (recognition && isListening) recognition.stop();
             clearInterval(timerInterval);
             clearInterval(wordTimer);
 
@@ -794,50 +642,54 @@
             document.getElementById('action-area').classList.add('hidden');
             document.getElementById('answer-box').classList.add('hidden');
             document.getElementById('buzzer-area').classList.remove('hidden');
-            document.getElementById('transcript-box').classList.add('hidden');
 
             speakText(activeQuestion.bold);
 
             const words = activeQuestion.bold.split(" ");
             let wordIndex = 0;
             const textContainer = document.getElementById('question-text');
-            textContainer.innerHTML = `<span class="bold-part"></span>`;
+            textContainer.innerText = "";
             
-            const boldSpan = textContainer.querySelector('.bold-part');
             const progressBar = document.getElementById('question-progress');
             progressBar.style.width = "0%";
-            document.getElementById('timer').innerText = "⚡ READING BOLD LEAD-IN... ⚡";
+            document.getElementById('timer').innerText = "⚡ BUZZER READY! (Reading...) ⚡";
 
             questionStartTime = performance.now();
 
-            let wordIntervalMs = readingSpeedSetting === 'slow' ? 650 : (readingSpeedSetting === 'fast' ? 250 : 450);
+            let wordIntervalMs = 450;
+            if (readingSpeedSetting === 'slow') wordIntervalMs = 650;
+            if (readingSpeedSetting === 'fast') wordIntervalMs = 250;
 
             wordTimer = setInterval(() => {
                 if (!questionActive) return;
                 if (wordIndex < words.length) {
-                    boldSpan.innerText += (wordIndex === 0 ? "" : " ") + words[wordIndex];
+                    textContainer.innerText += (wordIndex === 0 ? "" : " ") + words[wordIndex];
                     playSound('tick');
                     wordIndex++;
-                    progressBar.style.width = `${(wordIndex / words.length) * 100}%`;
+                    
+                    const percent = (wordIndex / words.length) * 100;
+                    progressBar.style.width = `${percent}%`;
                 } else {
                     clearInterval(wordTimer);
                     progressBar.style.width = "100%";
-                    start10SecondPausePhase();
+                    startPausePhase();
                 }
             }, wordIntervalMs); 
         }
 
-        function start10SecondPausePhase() {
+        function startPausePhase() {
             if (!questionActive) return;
-            let countdown = 10; 
+            let countdown = 5;
+            if (difficultySetting === 'beginner') countdown = 8;
+            if (difficultySetting === 'expert') countdown = 3;
 
-            document.getElementById('timer').innerText = `⏳ PAUSE BEFORE CONTINUING: ${countdown}s`;
+            document.getElementById('timer').innerText = `⏳ Pause (${countdown}s): ${countdown}s`;
             
             timerInterval = setInterval(() => {
                 if (!questionActive) return;
                 countdown--;
                 if (countdown > 0) {
-                    document.getElementById('timer').innerText = `⏳ PAUSE BEFORE CONTINUING: ${countdown}s`;
+                    document.getElementById('timer').innerText = `⏳ Pause (${countdown}s): ${countdown}s`;
                     playSound('tick');
                 } else {
                     clearInterval(timerInterval);
@@ -849,10 +701,8 @@
         function renderRestOfQuestion() {
             if (!questionActive) return;
             const textContainer = document.getElementById('question-text');
-            textContainer.innerHTML += ` <span class="rest-part">${activeQuestion.rest}</span>`;
-            
-            speakText(activeQuestion.rest);
-            document.getElementById('timer').innerText = "🔥 BUZZER OPEN FOR UNBOLD QUESTION! 🔥";
+            textContainer.innerText += " " + activeQuestion.rest;
+            document.getElementById('timer').innerText = "🔥 BUZZER STILL OPEN! 🔥";
         }
 
         function playerBuzz() {
@@ -865,25 +715,21 @@
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             playSound('buzz');
-            triggerScreenEffect(true);
+            triggerScreenEffect(true); // Green flash + screen shake on successful buzz-in
 
             stats.totalBuzzTime += buzzTimeMs;
-            if (buzzTimeMs < stats.fastestBuzz) stats.fastestBuzz = buzzTimeMs;
-
-            document.getElementById('buzzer-area').classList.add('hidden');
-            document.getElementById('buzzed-who').innerText = `🚨 Buzzed in! Reaction Time: ${buzzTimeMs} ms. Speak your answer now!`;
-            document.getElementById('action-area').classList.remove('hidden');
-            document.getElementById('transcript-box').classList.remove('hidden');
-            document.getElementById('live-transcript').innerText = "Listening...";
-
-            if (recognition) {
-                try {
-                    isListening = true;
-                    recognition.start();
-                } catch(e) { console.log(e); }
+            if (buzzTimeMs < stats.fastestBuzz) {
+                stats.fastestBuzz = buzzTimeMs;
             }
 
-            let responseTime = difficultySetting === 'beginner' ? 45 : (difficultySetting === 'expert' ? 15 : 30);
+            document.getElementById('buzzer-area').classList.add('hidden');
+            document.getElementById('buzzed-who').innerText = `🚨 Buzzed in! Reaction Time: ${buzzTimeMs} ms! Answer now!`;
+            document.getElementById('action-area').classList.remove('hidden');
+
+            let responseTime = 30;
+            if (difficultySetting === 'beginner') responseTime = 45;
+            if (difficultySetting === 'expert') responseTime = 15;
+
             document.getElementById('timer').innerText = `⏰ Answer Time: ${responseTime}s`;
             timerInterval = setInterval(() => {
                 responseTime--;
@@ -891,23 +737,22 @@
                 playSound('tick');
                 if (responseTime <= 0) {
                     clearInterval(timerInterval);
-                    if (recognition && isListening) recognition.stop();
                     playSound('incorrect');
-                    triggerScreenEffect(false);
+                    triggerScreenEffect(false); // Red flash + screen shake on timeout/incorrect
+                    alert("⏰ Time's up! Let's check the answer.");
                     markAnswer(false);
                 }
             }, 1000);
         }
 
         function revealAnswer() {
-            document.getElementById('full-answer-text').innerText = `${activeQuestion.bold} ${activeQuestion.rest} -> ${activeQuestion.answer}`;
+            document.getElementById('full-answer-text').innerText = activeQuestion.full;
             document.getElementById('answer-box').classList.remove('hidden');
-            speakText(activeQuestion.answer);
+            speakText(activeQuestion.full);
         }
 
         function markAnswer(isCorrect) {
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            if (recognition && isListening) recognition.stop();
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             questionActive = false;
@@ -917,17 +762,24 @@
                 score += activeQuestion.points;
                 stats.correct++;
                 playSound('correct');
-                triggerScreenEffect(true);
+                triggerScreenEffect(true); // Green flash on correct answer
             } else {
                 stats.incorrect++;
                 playSound('incorrect');
-                triggerScreenEffect(false);
-                if (difficultySetting === 'expert') score -= activeQuestion.points;
-                else if (difficultySetting === 'standard') score -= Math.floor(activeQuestion.points / 2);
+                triggerScreenEffect(false); // Red flash + shake on wrong answer
+                
+                if (difficultySetting === 'beginner') {
+                    // No penalty
+                } else if (difficultySetting === 'expert') {
+                    score -= activeQuestion.points;
+                } else {
+                    const deduction = Math.floor(activeQuestion.points / 2);
+                    score -= deduction;
+                }
             }
             updateScoreBoard();
             updateSidebarPane();
-            setTimeout(loadNextQuestion, 800);
+            loadNextQuestion();
         }
 
         function showSummaryScreen() {
@@ -953,10 +805,14 @@
             if (!gameScreenHidden) {
                 if (e.code === 'Space') {
                     e.preventDefault();
-                    if (questionActive) playerBuzz();
+                    if (questionActive) {
+                        playerBuzz();
+                    }
                 } else if (e.code === 'Enter') {
                     e.preventDefault();
-                    if (!questionActive && actionAreaHidden) loadNextQuestion();
+                    if (!questionActive && actionAreaHidden) {
+                        loadNextQuestion();
+                    }
                 } else if (e.code === 'KeyS') {
                     e.preventDefault();
                     skipQuestion();
@@ -965,10 +821,14 @@
                     revealAnswer();
                 } else if (e.code === 'KeyC') {
                     e.preventDefault();
-                    if (!actionAreaHidden) markAnswer(true);
+                    if (!actionAreaHidden) {
+                        markAnswer(true);
+                    }
                 } else if (e.code === 'KeyW') {
                     e.preventDefault();
-                    if (!actionAreaHidden) markAnswer(false);
+                    if (!actionAreaHidden) {
+                        markAnswer(false);
+                    }
                 }
             }
         });
@@ -979,7 +839,7 @@
 <div class="main-layout">
     <div class="container" id="app">
         <h1>🎮 JBQ Arcade Arena 🏆</h1>
-        <p class="subtitle">✨ Official Bible Fact-Pak Trainer & Voice Buzzer ✨</p>
+        <p class="subtitle">✨ The Super Fun Bible Quiz Trainer & Buzzer Game! ✨</p>
 
         <!-- MENU SCREEN -->
         <div id="menu-screen">
@@ -995,12 +855,6 @@
                     </select>
                 </div>
                 <div class="settings-row">
-                    <span>🗣️ Reading Voice:</span>
-                    <select id="voice-select">
-                        <option value="">Default Browser Voice</option>
-                    </select>
-                </div>
-                <div class="settings-row">
                     <span>🛡️ Difficulty Level:</span>
                     <select id="difficulty-select" onchange="updateSettingsFromUI()">
                         <option value="beginner">Beginner (No Penalty)</option>
@@ -1009,20 +863,10 @@
                     </select>
                 </div>
                 <div class="settings-row">
-                    <span>📌 Preset Tier Range:</span>
-                    <select id="preset-range-select" onchange="applyPresetRange(this.value)">
-                        <option value="custom">Custom Range</option>
-                        <option value="1-288">10-Point Questions (1 - 288)</option>
-                        <option value="289-480">20-Point Questions (289 - 480)</option>
-                        <option value="481-576">30-Point Questions (481 - 576)</option>
-                        <option value="1-576" selected>All Questions (1 - 576)</option>
-                    </select>
-                </div>
-                <div class="settings-row">
-                    <span>🔢 Question ID Range:</span>
+                    <span>🔢 Question ID Range (1-576):</span>
                     <div>
-                        <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576" oninput="document.getElementById('preset-range-select').value='custom'"> to 
-                        <input type="number" id="range-max" value="576" placeholder="Max" min="1" max="576" oninput="document.getElementById('preset-range-select').value='custom'">
+                        <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576"> to 
+                        <input type="number" id="range-max" value="546" placeholder="Max" min="1" max="576">
                     </div>
                 </div>
                 <div class="settings-row" style="margin-bottom:0;">
@@ -1033,10 +877,10 @@
 
             <h3 style="color: var(--accent-gold); font-size: 1.5rem; margin-top: 20px;">Pick Your Mission! 🚀</h3>
             <div class="menu-grid">
-                <button onclick="startGame(10)">⭐ 10-Point Quest<br><span style="font-size:0.9rem; font-weight:normal;">(Range 1-288)</span></button>
-                <button onclick="startGame(20)">⭐⭐ 20-Point Challenge<br><span style="font-size:0.9rem; font-weight:normal;">(Range 289-480)</span></button>
-                <button onclick="startGame(30)">⭐⭐⭐ 30-Point Boss Level<br><span style="font-size:0.9rem; font-weight:normal;">(Range 481-576)</span></button>
-                <button onclick="startGame('all')">🏆 Ultimate Random Mix!<br><span style="font-size:0.9rem; font-weight:normal;">(All Questions)</span></button>
+                <button onclick="startGame(10)">⭐ 10-Point Quest<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
+                <button onclick="startGame(20)">⭐⭐ 20-Point Challenge<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
+                <button onclick="startGame(30)">⭐⭐⭐ 30-Point Boss Level<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
+                <button onclick="startGame('all')">🏆 Ultimate Random Mix!<br><span style="font-size:0.9rem; font-weight:normal;">(All in Range)</span></button>
             </div>
             <div class="audio-toggle-group">
                 <span id="sound-status" onclick="toggleSound()">Sound: ON 🔊</span>
@@ -1062,15 +906,12 @@
             </div>
 
             <div id="buzzer-area" class="buzzer-section hidden">
-                <button class="buzzer-btn" onclick="playerBuzz()">🔔 BUZZ IN & SPEAK! 🔔</button>
+                <button class="buzzer-btn" onclick="playerBuzz()">🔔 BUZZ IN! 🔔</button>
                 <span class="keyboard-hint">⌨️ Press [SPACEBAR] to Buzz In!</span>
             </div>
 
             <div id="action-area" class="hidden">
                 <p id="buzzed-who" style="font-weight: bold; color: var(--accent-gold); font-size: 1.2rem;"></p>
-                <div class="transcript-box" id="transcript-box">
-                    🎙️ <strong>Voice Recognition:</strong> <span id="live-transcript">Listening...</span>
-                </div>
                 <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
                     <button onclick="revealAnswer()">💡 Peek [P]</button>
                     <button class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
@@ -1093,9 +934,9 @@
         <div id="summary-screen" class="hidden">
             <h2>🎉 Mission Complete! Awesome Job! 🌟</h2>
             <div class="summary-card">
-                <p style="font-size: 1.3rem; margin: 12px 0;">🎯 <strong>Total Questions Tried:</strong> <span id="sum-attempted" style="color: var(--accent-blue);">0</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">🎉 <strong>Correct Answers:</strong> <span id="sum-correct" style="color: #10b981;">0</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">💡 <strong>Incorrect Answers:</strong> <span id="sum-wrong" style="color: #ef4444;">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">🎯 <strong>Total Missions Tried:</strong> <span id="sum-attempted" style="color: var(--accent-blue);">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">🎉 <strong>Correct Wins:</strong> <span id="sum-correct" style="color: #10b981;">0</span></p>
+                <p style="font-size: 1.3rem; margin: 12px 0;">💡 <strong>Needs Practice:</strong> <span id="sum-wrong" style="color: #ef4444;">0</span></p>
                 <p style="font-size: 1.3rem; margin: 12px 0;">⚡ <strong>Fastest Reaction:</strong> <span id="sum-fast-time" style="color: #38bdf8;">0 ms</span></p>
                 <p style="font-size: 1.3rem; margin: 12px 0;">⏱️ <strong>Average Reaction:</strong> <span id="sum-avg-time" style="color: #fde047;">0 ms</span></p>
                 <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
