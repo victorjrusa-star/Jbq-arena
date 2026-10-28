@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,15 +15,15 @@
             --text-light: #ffffff;
         }
 
-        body { 
-            font-family: 'Comic Sans MS', 'Bubblegum Sans', 'Segoe UI', system-ui, sans-serif; 
-            background: var(--bg-gradient); 
-            color: var(--text-light); 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+        body {
+            font-family: 'Comic Sans MS', 'Bubblegum Sans', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
             transition: background-color 0.3s ease;
@@ -32,26 +33,57 @@
         .flash-green {
             animation: flashGreen 0.3s ease;
         }
+
         .flash-red {
             animation: flashRed 0.3s ease;
         }
+
         @keyframes flashGreen {
-            0% { background-color: rgba(16, 185, 129, 0.5); }
-            100% { background-color: transparent; }
+            0% {
+                background-color: rgba(16, 185, 129, 0.5);
+            }
+
+            100% {
+                background-color: transparent;
+            }
         }
+
         @keyframes flashRed {
-            0% { background-color: rgba(239, 68, 68, 0.5); }
-            100% { background-color: transparent; }
+            0% {
+                background-color: rgba(239, 68, 68, 0.5);
+            }
+
+            100% {
+                background-color: transparent;
+            }
         }
 
         .screen-shake {
             animation: shake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
         }
+
         @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
+
+            10%,
+            90% {
+                transform: translate3d(-2px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(4px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-6px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(6px, 0, 0);
+            }
         }
 
         .main-layout {
@@ -63,17 +95,17 @@
             align-items: flex-start;
         }
 
-        .container { 
+        .container {
             flex: 1;
-            max-width: 750px; 
-            width: 100%; 
-            background: var(--card-bg); 
+            max-width: 750px;
+            width: 100%;
+            background: var(--card-bg);
             backdrop-filter: blur(12px);
             border: 4px solid var(--accent-gold);
-            padding: 30px; 
-            border-radius: 30px; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
-            text-align: center; 
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            text-align: center;
             position: relative;
             z-index: 10;
         }
@@ -95,7 +127,7 @@
             margin-top: 0;
             text-align: center;
             font-size: 1.2rem;
-            border-bottom: 2px dashed rgba(255,255,255,0.2);
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.2);
             padding-bottom: 10px;
         }
 
@@ -111,19 +143,30 @@
             color: var(--accent-blue);
         }
 
-        h1 { 
-            color: var(--accent-gold); 
-            margin-bottom: 5px; 
+        h1 {
+            color: var(--accent-gold);
+            margin-bottom: 5px;
             font-size: 2.8rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 3px 3px 0px #d97706, 0 0 25px rgba(255, 183, 3, 0.6);
         }
 
-        .subtitle { color: #38bdf8; font-size: 1.2rem; margin-bottom: 25px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .subtitle {
+            color: #38bdf8;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
         .settings-box {
             background: rgba(15, 23, 42, 0.8);
             border: 2px dashed var(--accent-blue);
@@ -145,7 +188,8 @@
             gap: 10px;
         }
 
-        .settings-row select, .settings-row input {
+        .settings-row select,
+        .settings-row input {
             background: #1e293b;
             color: white;
             border: 2px solid var(--accent-blue);
@@ -166,39 +210,98 @@
             cursor: pointer;
         }
 
-        button { 
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
-            color: white; 
-            border: 3px solid #93c5fd; 
-            padding: 15px 18px; 
-            font-size: 1.1rem; 
+        /* Auth Screen Styles */
+        .auth-box {
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px dashed var(--accent-blue);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .auth-box input[type="password"] {
+            background: #1e293b;
+            color: white;
+            border: 2px solid var(--accent-gold);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 80%;
+            max-width: 300px;
+            margin-bottom: 15px;
             font-weight: bold;
-            border-radius: 20px; 
-            cursor: pointer; 
+        }
+
+        #auth-error {
+            color: #ef4444;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1.05rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: 3px solid #93c5fd;
+            padding: 15px 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 6px 0px #1e40af, 0 10px 20px rgba(59, 130, 246, 0.4);
             width: 100%;
             box-sizing: border-box;
         }
-        button:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 9px 0px #1e40af, 0 14px 24px rgba(59, 130, 246, 0.6); }
-        button:active { transform: translateY(3px); box-shadow: 0 3px 0px #1e40af; }
 
-        button.secondary { background: linear-gradient(135deg, #475569, #334155); border-color: #cbd5e1; box-shadow: 0 6px 0px #1e293b; }
-        button.warning { background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a; box-shadow: 0 6px 0px #78350f; }
-        button.danger { background: linear-gradient(135deg, #ef4444, #b91c1c); border-color: #fca5a5; box-shadow: 0 6px 0px #7f1d1d; }
-        button.purple { background: linear-gradient(135deg, #7c3aed, #5b21b6); border-color: #d8b4fe; box-shadow: 0 6px 0px #3b0764; }
+        button:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.1);
+            box-shadow: 0 9px 0px #1e40af, 0 14px 24px rgba(59, 130, 246, 0.6);
+        }
 
-        .card { 
-            background: rgba(15, 23, 42, 0.95); 
-            border: 3px dashed var(--accent-gold); 
-            padding: 25px; 
-            margin: 20px 0; 
-            text-align: left; 
-            border-radius: 20px; 
-            min-height: 120px; 
-            font-size: 1.4rem; 
-            line-height: 1.6; 
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0px #1e40af;
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #475569, #334155);
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 0px #1e293b;
+        }
+
+        button.warning {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            border-color: #fde68a;
+            box-shadow: 0 6px 0px #78350f;
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            border-color: #fca5a5;
+            box-shadow: 0 6px 0px #7f1d1d;
+        }
+
+        button.purple {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            border-color: #d8b4fe;
+            box-shadow: 0 6px 0px #3b0764;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px dashed var(--accent-gold);
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 20px;
+            min-height: 120px;
+            font-size: 1.4rem;
+            line-height: 1.6;
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6);
         }
 
         .progress-container {
@@ -210,7 +313,7 @@
             margin: 15px 0;
             overflow: hidden;
             padding: 2px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
         }
 
         .progress-bar {
@@ -221,19 +324,26 @@
             transition: width 0.3s ease;
         }
 
-        .timer-display { 
-            font-size: 1.8rem; 
-            font-weight: 900; 
-            color: #f87171; 
-            margin: 10px 0; 
+        .timer-display {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #f87171;
+            margin: 10px 0;
             text-shadow: 0 0 15px rgba(248, 113, 113, 0.5);
         }
 
-        .buzzer-section { display: flex; justify-content: center; margin: 25px 0; flex-direction: column; align-items: center; }
-        .buzzer-btn { 
-            font-size: 1.8rem; 
-            padding: 30px 60px; 
-            border-radius: 50px; 
+        .buzzer-section {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .buzzer-btn {
+            font-size: 1.8rem;
+            padding: 30px 60px;
+            border-radius: 50px;
             letter-spacing: 1px;
             border: 4px solid #fff;
             background: linear-gradient(135deg, #10b981, #047857);
@@ -250,23 +360,33 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .hidden { display: none; }
+            0% {
+                transform: scale(1);
+            }
 
-        .score-board { 
-            display: flex; 
-            justify-content: space-around; 
-            background: rgba(15, 23, 42, 0.8); 
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(15, 23, 42, 0.8);
             border: 2px solid var(--accent-blue);
-            padding: 15px; 
-            border-radius: 15px; 
-            font-weight: bold; 
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: bold;
             font-size: 1.4rem;
-            margin-bottom: 20px; 
+            margin-bottom: 20px;
         }
 
         .audio-toggle-group {
@@ -296,7 +416,7 @@
             padding: 25px;
             text-align: left;
             margin-top: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
         .footer-copyright {
@@ -307,16 +427,26 @@
         }
 
         @media(max-width: 900px) {
-            .main-layout { flex-direction: column; align-items: center; }
-            .sidebar-pane { width: 100%; box-sizing: border-box; }
+            .main-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .sidebar-pane {
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
     <script>
+        // CONFIGURABLE APP PASSWORD
+        const APP_PASSCODE = "liron"; // You can change this password here
+
         let audioCtx = null;
         let soundEnabled = true;
         let speechEnabled = true;
-        let readingSpeedSetting = "normal"; 
-        let difficultySetting = "standard";   
+        let readingSpeedSetting = "normal";
+        let difficultySetting = "standard";
 
         function initAudio() {
             if (!audioCtx) {
@@ -358,8 +488,8 @@
                     osc.stop(startTime + duration);
                 };
 
-                playChime(1046.50, now, 0.35);       
-                playChime(1318.51, now + 0.12, 0.45); 
+                playChime(1046.50, now, 0.35);
+                playChime(1318.51, now + 0.12, 0.45);
             } else if (type === 'correct') {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -391,11 +521,28 @@
         function triggerScreenEffect(isCorrect) {
             const body = document.body;
             const flashClass = isCorrect ? 'flash-green' : 'flash-red';
-            
+
             body.classList.add(flashClass, 'screen-shake');
             setTimeout(() => {
                 body.classList.remove(flashClass, 'screen-shake');
             }, 300);
+        }
+
+        function verifyPasscode(event) {
+            if (event && event.type === 'keydown' && event.key !== 'Enter') return;
+
+            const inputField = document.getElementById('passcode-input');
+            const errorLabel = document.getElementById('auth-error');
+
+            if (inputField.value === APP_PASSCODE) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.remove('hidden');
+            } else {
+                errorLabel.innerText = "❌ Incorrect Passcode. Access Denied!";
+                inputField.value = "";
+                inputField.focus();
+                triggerScreenEffect(false);
+            }
         }
 
         function toggleSound() {
@@ -427,7 +574,7 @@
 
         function speakText(text) {
             if (!speechEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = readingSpeedSetting === 'slow' ? 0.8 : (readingSpeedSetting === 'fast' ? 1.2 : 0.95);
             utterance.pitch = 1.0;
@@ -614,7 +761,7 @@
             document.getElementById('summary-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('side-pane').style.display = 'block';
-            
+
             score = 0;
             stats = { attempted: 0, correct: 0, incorrect: 0, totalBuzzTime: 0, fastestBuzz: 999999 };
             updateScoreBoard();
@@ -677,7 +824,7 @@
             let wordIndex = 0;
             const textContainer = document.getElementById('question-text');
             textContainer.innerText = "";
-            
+
             const progressBar = document.getElementById('question-progress');
             progressBar.style.width = "0%";
             document.getElementById('timer').innerText = "⚡ BUZZER READY! (Reading...) ⚡";
@@ -694,7 +841,7 @@
                     textContainer.innerText += (wordIndex === 0 ? "" : " ") + words[wordIndex];
                     playSound('tick');
                     wordIndex++;
-                    
+
                     const percent = (wordIndex / words.length) * 100;
                     progressBar.style.width = `${percent}%`;
                 } else {
@@ -702,7 +849,7 @@
                     progressBar.style.width = "100%";
                     startPausePhase();
                 }
-            }, wordIntervalMs); 
+            }, wordIntervalMs);
         }
 
         function startPausePhase() {
@@ -712,7 +859,7 @@
             if (difficultySetting === 'expert') countdown = 3;
 
             document.getElementById('timer').innerText = `⏳ Pause (${countdown}s): ${countdown}s`;
-            
+
             timerInterval = setInterval(() => {
                 if (!questionActive) return;
                 countdown--;
@@ -735,11 +882,11 @@
 
         function playerBuzz() {
             if (!questionActive) return;
-            
+
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             const buzzTimeMs = Math.round(performance.now() - questionStartTime);
 
-            questionActive = false; 
+            questionActive = false;
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             playSound('buzz');
@@ -784,7 +931,7 @@
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             questionActive = false;
-            
+
             stats.attempted++;
             if (isCorrect) {
                 score += activeQuestion.points;
@@ -795,7 +942,7 @@
                 stats.incorrect++;
                 playSound('incorrect');
                 triggerScreenEffect(false);
-                
+
                 if (difficultySetting === 'beginner') {
                     // No penalty
                 } else if (difficultySetting === 'expert') {
@@ -827,6 +974,14 @@
         }
 
         window.addEventListener('keydown', (e) => {
+            const authScreenHidden = document.getElementById('auth-screen').classList.contains('hidden');
+            if (!authScreenHidden) {
+                if (e.code === 'Enter') {
+                    verifyPasscode(e);
+                }
+                return;
+            }
+
             const gameScreenHidden = document.getElementById('game-screen').classList.contains('hidden');
             const actionAreaHidden = document.getElementById('action-area').classList.contains('hidden');
 
@@ -862,158 +1017,189 @@
         });
     </script>
 </head>
+
 <body>
 
-<div class="main-layout">
-    <div class="container" id="app">
-        <h1>🎮 JBQ Arcade Arena 🏆</h1>
-        <p class="subtitle">✨ The Super Fun Bible Quiz Trainer & Buzzer Game! ✨</p>
+    <div class="main-layout">
+        <div class="container" id="app">
+            <h1>🎮 JBQ Arcade Arena 🏆</h1>
+            <p class="subtitle">✨ The Super Fun Bible Quiz Trainer & Buzzer Game! ✨</p>
 
-        <!-- MENU SCREEN -->
-        <div id="menu-screen">
-            <h3 style="color: var(--accent-gold); font-size: 1.5rem;">Configure Your Game ⚙️</h3>
-            
-            <div class="settings-box">
-                <div class="settings-row">
-                    <span>🐢 Reading Speed:</span>
-                    <select id="reading-speed-select" onchange="updateSettingsFromUI()">
-                        <option value="slow">Slow (Younger Children)</option>
-                        <option value="normal" selected>Normal (Standard)</option>
-                        <option value="fast">Fast (Advanced Quizzers)</option>
-                    </select>
+            <!-- AUTHENTICATION / PASSCODE SCREEN -->
+            <div id="auth-screen">
+                <div class="auth-box">
+                    <h3 style="color: var(--accent-gold); margin-top: 0; font-size: 1.5rem;">🔒 Restricted Access</h3>
+                    <p style="color: #cbd5e1; margin-bottom: 20px;">Please enter the passcode to unlock the quiz arcade:
+                    </p>
+                    <input type="password" id="passcode-input" placeholder="Enter Passcode" autofocus>
+                    <div style="margin-top: 10px;">
+                        <button style="width: auto; padding: 12px 30px;" onclick="verifyPasscode()">Unlock App
+                            🔓</button>
+                    </div>
+                    <div id="auth-error"></div>
                 </div>
-                <div class="settings-row">
-                    <span>🛡️ Difficulty Level:</span>
-                    <select id="difficulty-select" onchange="updateSettingsFromUI()">
-                        <option value="beginner">Beginner (No Penalty)</option>
-                        <option value="standard" selected>Standard (Half Penalty)</option>
-                        <option value="expert">Expert (Full Penalty & Shorter Timer)</option>
-                    </select>
-                </div>
-                <div class="settings-row">
-                    <span>⭐ Filter by Point Value:</span>
-                    <select id="points-filter-select">
-                        <option value="all" selected>All Points (10, 20 & 30)</option>
-                        <option value="10">10-Pointers Only</option>
-                        <option value="20">20-Pointers Only</option>
-                        <option value="30">30-Pointers Only</option>
-                    </select>
-                </div>
-                <div class="settings-row">
-                    <span>🔢 Question ID Range (1-576):</span>
-                    <div>
-                        <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576"> to 
-                        <input type="number" id="range-max" value="546" placeholder="Max" min="1" max="576">
+            </div>
+
+            <!-- MENU SCREEN -->
+            <div id="menu-screen" class="hidden">
+                <h3 style="color: var(--accent-gold); font-size: 1.5rem;">Configure Your Game ⚙️</h3>
+
+                <div class="settings-box">
+                    <div class="settings-row">
+                        <span>🐢 Reading Speed:</span>
+                        <select id="reading-speed-select" onchange="updateSettingsFromUI()">
+                            <option value="slow">Slow (Younger Children)</option>
+                            <option value="normal" selected>Normal (Standard)</option>
+                            <option value="fast">Fast (Advanced Quizzers)</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <span>🛡️ Difficulty Level:</span>
+                        <select id="difficulty-select" onchange="updateSettingsFromUI()">
+                            <option value="beginner">Beginner (No Penalty)</option>
+                            <option value="standard" selected>Standard (Half Penalty)</option>
+                            <option value="expert">Expert (Full Penalty & Shorter Timer)</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <span>⭐ Filter by Point Value:</span>
+                        <select id="points-filter-select">
+                            <option value="all" selected>All Points (10, 20 & 30)</option>
+                            <option value="10">10-Pointers Only</option>
+                            <option value="20">20-Pointers Only</option>
+                            <option value="30">30-Pointers Only</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <span>🔢 Question ID Range (1-576):</span>
+                        <div>
+                            <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576"> to
+                            <input type="number" id="range-max" value="546" placeholder="Max" min="1" max="576">
+                        </div>
+                    </div>
+                    <div class="settings-row" style="margin-bottom:0;">
+                        <span>📜 Quotation Questions Only:</span>
+                        <input type="checkbox" id="quotes-only-checkbox">
                     </div>
                 </div>
-                <div class="settings-row" style="margin-bottom:0;">
-                    <span>📜 Quotation Questions Only:</span>
-                    <input type="checkbox" id="quotes-only-checkbox">
+
+                <h3 style="color: var(--accent-gold); font-size: 1.4rem; margin-top: 15px;">Pick by Point Value ⭐</h3>
+                <div class="menu-grid">
+                    <button onclick="startGame('points', 10)">⭐ 10-Point Quest</button>
+                    <button onclick="startGame('points', 20)">⭐⭐ 20-Point Challenge</button>
+                    <button onclick="startGame('points', 30)">⭐⭐⭐ 30-Point Boss Level</button>
+                    <button onclick="startGame('points', 'all')">🏆 Ultimate Random Mix!</button>
+                </div>
+
+                <h3 style="color: var(--accent-purple); font-size: 1.4rem; margin-top: 15px;">Pick by Question Word
+                    Group 🧠</h3>
+                <div class="menu-grid">
+                    <button class="purple" onclick="startGame('prefix', 'QUOTATION')">📜 Quotation Questions</button>
+                    <button class="purple" onclick="startGame('prefix', 'WHAT')">❓ "What" Starters</button>
+                    <button class="purple" onclick="startGame('prefix', 'WHO')">👤 "Who / Whom / Which"</button>
+                    <button class="purple" onclick="startGame('prefix', 'HOW')">🛠️ "How" Starters</button>
+                    <button class="purple" onclick="startGame('prefix', 'WHY')">💡 "Why" Starters</button>
+                    <button class="purple" onclick="startGame('prefix', 'WHERE')">🗺️ "Where / When / To"</button>
+                </div>
+
+                <div class="audio-toggle-group">
+                    <span id="sound-status" onclick="toggleSound()">Sound: ON 🔊</span>
+                    <span id="speech-status" onclick="toggleSpeech()">Speech: ON 🗣️</span>
                 </div>
             </div>
 
-            <h3 style="color: var(--accent-gold); font-size: 1.4rem; margin-top: 15px;">Pick by Point Value ⭐</h3>
-            <div class="menu-grid">
-                <button onclick="startGame('points', 10)">⭐ 10-Point Quest</button>
-                <button onclick="startGame('points', 20)">⭐⭐ 20-Point Challenge</button>
-                <button onclick="startGame('points', 30)">⭐⭐⭐ 30-Point Boss Level</button>
-                <button onclick="startGame('points', 'all')">🏆 Ultimate Random Mix!</button>
-            </div>
+            <!-- GAMEPLAY SCREEN -->
+            <div id="game-screen" class="hidden">
+                <div class="score-board">
+                    <span id="score-label">⭐ Score: 0</span>
+                    <span id="q-type-label" style="color: var(--accent-gold);">🎯 Points: 10</span>
+                </div>
 
-            <h3 style="color: var(--accent-purple); font-size: 1.4rem; margin-top: 15px;">Pick by Question Word Group 🧠</h3>
-            <div class="menu-grid">
-                <button class="purple" onclick="startGame('prefix', 'QUOTATION')">📜 Quotation Questions</button>
-                <button class="purple" onclick="startGame('prefix', 'WHAT')">❓ "What" Starters</button>
-                <button class="purple" onclick="startGame('prefix', 'WHO')">👤 "Who / Whom / Which"</button>
-                <button class="purple" onclick="startGame('prefix', 'HOW')">🛠️ "How" Starters</button>
-                <button class="purple" onclick="startGame('prefix', 'WHY')">💡 "Why" Starters</button>
-                <button class="purple" onclick="startGame('prefix', 'WHERE')">🗺️ "Where / When / To"</button>
-            </div>
+                <div class="timer-display" id="timer">Get Ready... 🚀</div>
 
-            <div class="audio-toggle-group">
-                <span id="sound-status" onclick="toggleSound()">Sound: ON 🔊</span>
-                <span id="speech-status" onclick="toggleSpeech()">Speech: ON 🗣️</span>
-            </div>
-        </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="question-progress"></div>
+                </div>
 
-        <!-- GAMEPLAY SCREEN -->
-        <div id="game-screen" class="hidden">
-            <div class="score-board">
-                <span id="score-label">⭐ Score: 0</span>
-                <span id="q-type-label" style="color: var(--accent-gold);">🎯 Points: 10</span>
-            </div>
+                <div class="card">
+                    <p id="question-text" style="margin: 0; color: #fef08a;">Loading question...</p>
+                </div>
 
-            <div class="timer-display" id="timer">Get Ready... 🚀</div>
+                <div id="buzzer-area" class="buzzer-section hidden">
+                    <button class="buzzer-btn" onclick="playerBuzz()">🔔 BUZZ IN! 🔔</button>
+                    <span class="keyboard-hint">⌨️ Press [SPACEBAR] to Buzz In!</span>
+                </div>
 
-            <div class="progress-container">
-                <div class="progress-bar" id="question-progress"></div>
-            </div>
+                <div id="action-area" class="hidden">
+                    <p id="buzzed-who" style="font-weight: bold; color: var(--accent-gold); font-size: 1.2rem;"></p>
+                    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
+                        <button style="width:auto;" onclick="revealAnswer()">💡 Peek [P]</button>
+                        <button style="width:auto;" class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
+                        <button style="width:auto;" class="danger" onclick="markAnswer(false)">❌ Wrong [W]</button>
+                    </div>
+                </div>
 
-            <div class="card">
-                <p id="question-text" style="margin: 0; color: #fef08a;">Loading question...</p>
-            </div>
+                <div id="answer-box" class="hidden"
+                    style="margin-top: 20px; background: rgba(245, 158, 11, 0.2); border: 2px dashed var(--accent-gold); padding: 15px; border-radius: 15px; text-align: left;">
+                    <strong style="color: var(--accent-gold); font-size: 1.2rem;">📖 Correct Answer:</strong>
+                    <p id="full-answer-text" style="margin: 5px 0 0 0; font-size: 1.1rem;"></p>
+                </div>
 
-            <div id="buzzer-area" class="buzzer-section hidden">
-                <button class="buzzer-btn" onclick="playerBuzz()">🔔 BUZZ IN! 🔔</button>
-                <span class="keyboard-hint">⌨️ Press [SPACEBAR] to Buzz In!</span>
-            </div>
-
-            <div id="action-area" class="hidden">
-                <p id="buzzed-who" style="font-weight: bold; color: var(--accent-gold); font-size: 1.2rem;"></p>
-                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
-                    <button style="width:auto;" onclick="revealAnswer()">💡 Peek [P]</button>
-                    <button style="width:auto;" class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
-                    <button style="width:auto;" class="danger" onclick="markAnswer(false)">❌ Wrong [W]</button>
+                <div class="control-panel">
+                    <button style="width:auto;" class="warning" onclick="skipQuestion()">⏭️ Skip [S]</button>
+                    <button style="width:auto;" onclick="loadNextQuestion()">➡️ Next [Enter]</button>
+                    <button style="width:auto;" class="secondary" onclick="returnToMenu()">🏠 Quit to Home</button>
                 </div>
             </div>
 
-            <div id="answer-box" class="hidden" style="margin-top: 20px; background: rgba(245, 158, 11, 0.2); border: 2px dashed var(--accent-gold); padding: 15px; border-radius: 15px; text-align: left;">
-                <strong style="color: var(--accent-gold); font-size: 1.2rem;">📖 Correct Answer:</strong> <p id="full-answer-text" style="margin: 5px 0 0 0; font-size: 1.1rem;"></p>
+            <!-- SUMMARY SCREEN -->
+            <div id="summary-screen" class="hidden">
+                <h2>🎉 Mission Complete! Awesome Job! 🌟</h2>
+                <div class="summary-card">
+                    <p style="font-size: 1.3rem; margin: 12px 0;">🎯 <strong>Total Missions Tried:</strong> <span
+                            id="sum-attempted" style="color: var(--accent-blue);">0</span></p>
+                    <p style="font-size: 1.3rem; margin: 12px 0;">🎉 <strong>Correct Wins:</strong> <span
+                            id="sum-correct" style="color: #10b981;">0</span></p>
+                    <p style="font-size: 1.3rem; margin: 12px 0;">💡 <strong>Needs Practice:</strong> <span
+                            id="sum-wrong" style="color: #ef4444;">0</span></p>
+                    <p style="font-size: 1.3rem; margin: 12px 0;">⚡ <strong>Fastest Reaction:</strong> <span
+                            id="sum-fast-time" style="color: #38bdf8;">0 ms</span></p>
+                    <p style="font-size: 1.3rem; margin: 12px 0;">⏱️ <strong>Average Reaction:</strong> <span
+                            id="sum-avg-time" style="color: #fde047;">0 ms</span></p>
+                    <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
+                    <p style="font-size: 1.6rem; margin: 10px 0; color: var(--accent-gold);">🏆 <strong>Total Stars
+                            Scored:</strong> <span id="sum-score">0</span> Points!</p>
+                </div>
+                <div style="margin-top: 25px;">
+                    <button style="width:auto;" onclick="returnToMenu()">🏠 Play Again!</button>
+                </div>
             </div>
 
-            <div class="control-panel">
-                <button style="width:auto;" class="warning" onclick="skipQuestion()">⏭️ Skip [S]</button>
-                <button style="width:auto;" onclick="loadNextQuestion()">➡️ Next [Enter]</button>
-                <button style="width:auto;" class="secondary" onclick="returnToMenu()">🏠 Quit to Home</button>
+            <div class="footer-copyright">
+                © 2026 lironvictor. All rights reserved.
             </div>
         </div>
 
-        <!-- SUMMARY SCREEN -->
-        <div id="summary-screen" class="hidden">
-            <h2>🎉 Mission Complete! Awesome Job! 🌟</h2>
-            <div class="summary-card">
-                <p style="font-size: 1.3rem; margin: 12px 0;">🎯 <strong>Total Missions Tried:</strong> <span id="sum-attempted" style="color: var(--accent-blue);">0</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">🎉 <strong>Correct Wins:</strong> <span id="sum-correct" style="color: #10b981;">0</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">💡 <strong>Needs Practice:</strong> <span id="sum-wrong" style="color: #ef4444;">0</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">⚡ <strong>Fastest Reaction:</strong> <span id="sum-fast-time" style="color: #38bdf8;">0 ms</span></p>
-                <p style="font-size: 1.3rem; margin: 12px 0;">⏱️ <strong>Average Reaction:</strong> <span id="sum-avg-time" style="color: #fde047;">0 ms</span></p>
-                <hr style="border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
-                <p style="font-size: 1.6rem; margin: 10px 0; color: var(--accent-gold);">🏆 <strong>Total Stars Scored:</strong> <span id="sum-score">0</span> Points!</p>
+        <!-- RIGHT HAND SIDE PANE -->
+        <div class="sidebar-pane" id="side-pane">
+            <h3>📊 Game Tracker</h3>
+            <div class="sidebar-stat">
+                Answered: <span id="side-answered">0</span>
             </div>
-            <div style="margin-top: 25px;">
-                <button style="width:auto;" onclick="returnToMenu()">🏠 Play Again!</button>
+            <div class="sidebar-stat">
+                Left: <span id="side-left">0</span>
             </div>
-        </div>
-
-        <div class="footer-copyright">
-            © 2026 lironvictor. All rights reserved.
+            <div class="sidebar-stat">
+                Marks: <span id="side-marks">0</span>
+            </div>
         </div>
     </div>
 
-    <!-- RIGHT HAND SIDE PANE -->
-    <div class="sidebar-pane" id="side-pane">
-        <h3>📊 Game Tracker</h3>
-        <div class="sidebar-stat">
-            Answered: <span id="side-answered">0</span>
-        </div>
-        <div class="sidebar-stat">
-            Left: <span id="side-left">0</span>
-        </div>
-        <div class="sidebar-stat">
-            Marks: <span id="side-marks">0</span>
-        </div>
-    </div>
-</div>
+    <script>
+        // Allow pressing Enter in passcode input
+        document.getElementById('passcode-input').addEventListener('keydown', verifyPasscode);
+    </script>
 
 </body>
+
 </html>
