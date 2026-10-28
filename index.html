@@ -10,6 +10,7 @@
             --card-bg: rgba(30, 41, 59, 0.9);
             --accent-gold: #ffb703;
             --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
             --text-light: #ffffff;
         }
 
@@ -121,7 +122,7 @@
 
         .subtitle { color: #38bdf8; font-size: 1.2rem; margin-bottom: 25px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
 
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
         
         .settings-box {
             background: rgba(15, 23, 42, 0.8);
@@ -169,13 +170,15 @@
             background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
             color: white; 
             border: 3px solid #93c5fd; 
-            padding: 18px 20px; 
-            font-size: 1.2rem; 
+            padding: 15px 18px; 
+            font-size: 1.1rem; 
             font-weight: bold;
             border-radius: 20px; 
             cursor: pointer; 
             transition: all 0.2s ease;
             box-shadow: 0 6px 0px #1e40af, 0 10px 20px rgba(59, 130, 246, 0.4);
+            width: 100%;
+            box-sizing: border-box;
         }
         button:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 9px 0px #1e40af, 0 14px 24px rgba(59, 130, 246, 0.6); }
         button:active { transform: translateY(3px); box-shadow: 0 3px 0px #1e40af; }
@@ -183,6 +186,7 @@
         button.secondary { background: linear-gradient(135deg, #475569, #334155); border-color: #cbd5e1; box-shadow: 0 6px 0px #1e293b; }
         button.warning { background: linear-gradient(135deg, #d97706, #b45309); border-color: #fde68a; box-shadow: 0 6px 0px #78350f; }
         button.danger { background: linear-gradient(135deg, #ef4444, #b91c1c); border-color: #fca5a5; box-shadow: 0 6px 0px #7f1d1d; }
+        button.purple { background: linear-gradient(135deg, #7c3aed, #5b21b6); border-color: #d8b4fe; box-shadow: 0 6px 0px #3b0764; }
 
         .card { 
             background: rgba(15, 23, 42, 0.95); 
@@ -235,6 +239,7 @@
             background: linear-gradient(135deg, #10b981, #047857);
             box-shadow: 0 8px 0px #065f46, 0 15px 25px rgba(16, 185, 129, 0.5);
             animation: pulse 1.5s infinite;
+            width: auto;
         }
 
         .keyboard-hint {
@@ -383,7 +388,6 @@
             }
         }
 
-        // Trigger Screen Flash & Shake arcade effects
         function triggerScreenEffect(isCorrect) {
             const body = document.body;
             const flashClass = isCorrect ? 'flash-green' : 'flash-red';
@@ -430,7 +434,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // Comprehensive Bible Fact-Pak Question Database Sample covering 10, 20, and 30 pointers across ranges
         const questionDatabase = [
             // --- 10-POINT QUESTIONS ---
             { id: 1, points: 10, isQuotation: false, bold: "What is the Bible?", rest: "The Bible is the inspired Word of God and is His revelation to all people of Himself and His plan of salvation.", full: "What is the Bible? The Bible is the inspired Word of God and is His revelation to all people of Himself and His plan of salvation." },
@@ -560,23 +563,48 @@
         let questionActive = false;
         let questionStartTime = 0;
 
-        function startGame(category) {
+        function startGame(modeType, groupPrefix = null) {
             initAudio();
             updateSettingsFromUI();
 
             const minId = parseInt(document.getElementById('range-min').value) || 1;
             const maxId = parseInt(document.getElementById('range-max').value) || 576;
             const quotesOnly = document.getElementById('quotes-only-checkbox').checked;
+            const selectedPointsFilter = document.getElementById('points-filter-select').value;
 
             currentPool = questionDatabase.filter(q => {
-                const matchesCategory = (category === 'all') || (q.points === category);
                 const matchesRange = (q.id >= minId && q.id <= maxId);
                 const matchesQuotes = (!quotesOnly || q.isQuotation);
-                return matchesCategory && matchesRange && matchesQuotes;
+
+                let matchesPointsFilter = true;
+                if (selectedPointsFilter !== 'all') {
+                    matchesPointsFilter = (q.points === parseInt(selectedPointsFilter));
+                }
+
+                let matchesCategoryOrGroup = true;
+                if (modeType === 'points') {
+                    matchesCategoryOrGroup = (groupPrefix === 'all') || (q.points === groupPrefix);
+                } else if (modeType === 'prefix') {
+                    const text = q.bold.trim().toUpperCase();
+                    if (groupPrefix === 'QUOTATION') {
+                        matchesCategoryOrGroup = text.startsWith("QUOTATION");
+                    } else if (groupPrefix === 'WHAT') {
+                        matchesCategoryOrGroup = text.startsWith("WHAT");
+                    } else if (groupPrefix === 'WHO') {
+                        matchesCategoryOrGroup = text.startsWith("WHO") || text.startsWith("WHOM") || text.startsWith("WHICH");
+                    } else if (groupPrefix === 'HOW') {
+                        matchesCategoryOrGroup = text.startsWith("HOW");
+                    } else if (groupPrefix === 'WHY') {
+                        matchesCategoryOrGroup = text.startsWith("WHY");
+                    } else if (groupPrefix === 'WHERE') {
+                        matchesCategoryOrGroup = text.startsWith("WHERE") || text.startsWith("WHEN") || text.startsWith("TO");
+                    }
+                }
+                return matchesRange && matchesQuotes && matchesPointsFilter && matchesCategoryOrGroup;
             });
 
             if (currentPool.length === 0) {
-                alert("No questions match your selected filter criteria! Please check your ID range or quotation filter.");
+                alert("No questions match your selected filter criteria! Please check your ID range, point filter, or grouping selection.");
                 return;
             }
 
@@ -715,7 +743,7 @@
             clearInterval(timerInterval);
             clearInterval(wordTimer);
             playSound('buzz');
-            triggerScreenEffect(true); // Green flash + screen shake on successful buzz-in
+            triggerScreenEffect(true);
 
             stats.totalBuzzTime += buzzTimeMs;
             if (buzzTimeMs < stats.fastestBuzz) {
@@ -738,7 +766,7 @@
                 if (responseTime <= 0) {
                     clearInterval(timerInterval);
                     playSound('incorrect');
-                    triggerScreenEffect(false); // Red flash + screen shake on timeout/incorrect
+                    triggerScreenEffect(false);
                     alert("⏰ Time's up! Let's check the answer.");
                     markAnswer(false);
                 }
@@ -762,11 +790,11 @@
                 score += activeQuestion.points;
                 stats.correct++;
                 playSound('correct');
-                triggerScreenEffect(true); // Green flash on correct answer
+                triggerScreenEffect(true);
             } else {
                 stats.incorrect++;
                 playSound('incorrect');
-                triggerScreenEffect(false); // Red flash + shake on wrong answer
+                triggerScreenEffect(false);
                 
                 if (difficultySetting === 'beginner') {
                     // No penalty
@@ -863,6 +891,15 @@
                     </select>
                 </div>
                 <div class="settings-row">
+                    <span>⭐ Filter by Point Value:</span>
+                    <select id="points-filter-select">
+                        <option value="all" selected>All Points (10, 20 & 30)</option>
+                        <option value="10">10-Pointers Only</option>
+                        <option value="20">20-Pointers Only</option>
+                        <option value="30">30-Pointers Only</option>
+                    </select>
+                </div>
+                <div class="settings-row">
                     <span>🔢 Question ID Range (1-576):</span>
                     <div>
                         <input type="number" id="range-min" value="1" placeholder="Min" min="1" max="576"> to 
@@ -875,13 +912,24 @@
                 </div>
             </div>
 
-            <h3 style="color: var(--accent-gold); font-size: 1.5rem; margin-top: 20px;">Pick Your Mission! 🚀</h3>
+            <h3 style="color: var(--accent-gold); font-size: 1.4rem; margin-top: 15px;">Pick by Point Value ⭐</h3>
             <div class="menu-grid">
-                <button onclick="startGame(10)">⭐ 10-Point Quest<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
-                <button onclick="startGame(20)">⭐⭐ 20-Point Challenge<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
-                <button onclick="startGame(30)">⭐⭐⭐ 30-Point Boss Level<br><span style="font-size:0.9rem; font-weight:normal;">(Filtered Range)</span></button>
-                <button onclick="startGame('all')">🏆 Ultimate Random Mix!<br><span style="font-size:0.9rem; font-weight:normal;">(All in Range)</span></button>
+                <button onclick="startGame('points', 10)">⭐ 10-Point Quest</button>
+                <button onclick="startGame('points', 20)">⭐⭐ 20-Point Challenge</button>
+                <button onclick="startGame('points', 30)">⭐⭐⭐ 30-Point Boss Level</button>
+                <button onclick="startGame('points', 'all')">🏆 Ultimate Random Mix!</button>
             </div>
+
+            <h3 style="color: var(--accent-purple); font-size: 1.4rem; margin-top: 15px;">Pick by Question Word Group 🧠</h3>
+            <div class="menu-grid">
+                <button class="purple" onclick="startGame('prefix', 'QUOTATION')">📜 Quotation Questions</button>
+                <button class="purple" onclick="startGame('prefix', 'WHAT')">❓ "What" Starters</button>
+                <button class="purple" onclick="startGame('prefix', 'WHO')">👤 "Who / Whom / Which"</button>
+                <button class="purple" onclick="startGame('prefix', 'HOW')">🛠️ "How" Starters</button>
+                <button class="purple" onclick="startGame('prefix', 'WHY')">💡 "Why" Starters</button>
+                <button class="purple" onclick="startGame('prefix', 'WHERE')">🗺️ "Where / When / To"</button>
+            </div>
+
             <div class="audio-toggle-group">
                 <span id="sound-status" onclick="toggleSound()">Sound: ON 🔊</span>
                 <span id="speech-status" onclick="toggleSpeech()">Speech: ON 🗣️</span>
@@ -913,9 +961,9 @@
             <div id="action-area" class="hidden">
                 <p id="buzzed-who" style="font-weight: bold; color: var(--accent-gold); font-size: 1.2rem;"></p>
                 <div style="display: flex; gap: 12px; justify-content: center; margin-top: 15px; flex-wrap: wrap;">
-                    <button onclick="revealAnswer()">💡 Peek [P]</button>
-                    <button class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
-                    <button class="danger" onclick="markAnswer(false)">❌ Wrong [W]</button>
+                    <button style="width:auto;" onclick="revealAnswer()">💡 Peek [P]</button>
+                    <button style="width:auto;" class="secondary" onclick="markAnswer(true)">🎉 Correct [C]</button>
+                    <button style="width:auto;" class="danger" onclick="markAnswer(false)">❌ Wrong [W]</button>
                 </div>
             </div>
 
@@ -924,9 +972,9 @@
             </div>
 
             <div class="control-panel">
-                <button class="warning" onclick="skipQuestion()">⏭️ Skip [S]</button>
-                <button onclick="loadNextQuestion()">➡️ Next [Enter]</button>
-                <button class="secondary" onclick="returnToMenu()">🏠 Quit to Home</button>
+                <button style="width:auto;" class="warning" onclick="skipQuestion()">⏭️ Skip [S]</button>
+                <button style="width:auto;" onclick="loadNextQuestion()">➡️ Next [Enter]</button>
+                <button style="width:auto;" class="secondary" onclick="returnToMenu()">🏠 Quit to Home</button>
             </div>
         </div>
 
@@ -943,7 +991,7 @@
                 <p style="font-size: 1.6rem; margin: 10px 0; color: var(--accent-gold);">🏆 <strong>Total Stars Scored:</strong> <span id="sum-score">0</span> Points!</p>
             </div>
             <div style="margin-top: 25px;">
-                <button onclick="returnToMenu()">🏠 Play Again!</button>
+                <button style="width:auto;" onclick="returnToMenu()">🏠 Play Again!</button>
             </div>
         </div>
 
